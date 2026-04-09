@@ -1,0 +1,34 @@
+services:
+  db:
+    # Usa a imagem oficial do MySQL 8 para o banco de dados.
+    image: mysql:8.0
+    container_name: adega_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: adega_db
+      MYSQL_USER: adega_user
+      MYSQL_PASSWORD: adega_password
+    ports:
+      - "3307:3306" # Mapeia a porta do MySQL para 3307 no host para evitar conflito com MySQL local.
+    volumes:
+      - db_data:/var/lib/mysql # Persiste dados do banco entre reinícios.
+
+  api:
+    # Constrói o backend Java a partir do diretório ./adega.
+    build: ./adega
+    container_name: adega_api
+    ports:
+      - "8080:8080" # Porta padrão do Spring Boot.
+    depends_on:
+      - db # Garante que o banco seja iniciado primeiro.
+
+  site:
+    # Constrói o frontend React/Vite a partir do diretório ./site-adega.
+    build: ./site-adega
+    container_name: adega_site
+    ports:
+      - "5173:5173" # Porta 80 para acessar via localhost sem especificar porta.
+
+volumes:
+  db_data: # Volume nomeado para armazenar dados do MySQL.
