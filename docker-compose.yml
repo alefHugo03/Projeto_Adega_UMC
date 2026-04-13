@@ -5,30 +5,49 @@ services:
     container_name: adega_db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: adega_db
-      MYSQL_USER: adega_user
-      MYSQL_PASSWORD: adega_password
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "3307:3306" # Mapeia a porta do MySQL para 3307 no host para evitar conflito com MySQL local.
+      - "${DB_PORT_HOST:-3307}:3306" # Mapeia a porta do MySQL via variável do .env
     volumes:
       - db_data:/var/lib/mysql # Persiste dados do banco entre reinícios.
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   api:
     # Constrói o backend Java a partir do diretório ./adega.
     build: ./adega
     container_name: adega_api
+    restart: on-failure
     ports:
-      - "8080:8080" # Porta padrão do Spring Boot.
+      - "${API_PORT_HOST:-8080}:8080"
     depends_on:
-      - db # Garante que o banco seja iniciado primeiro.
+      db:
+        condition: service_healthy
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
 
   site:
     # Constrói o frontend React/Vite a partir do diretório ./site-adega.
     build: ./site-adega
     container_name: adega_site
     ports:
-      - "5173:5173" # Porta 80 para acessar via localhost sem especificar porta.
+      - "${SITE_PORT_HOST:-5173}:5173"
+    environment:
+      - VITE_HOST=0.0.0.0 # Garante que o Vite aceite conexões externas ao container
+      - NODE_ENV=development
+      - PORT=5173
+      - VITE_API_URL=http://api:8080
+    command: npm run dev -- --host 0.0.0.0
 
 volumes:
   db_data: # Volume nomeado para armazenar dados do MySQL.
