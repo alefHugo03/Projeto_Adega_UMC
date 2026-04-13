@@ -2,9 +2,11 @@ package api.servico.adega.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -42,10 +44,47 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
+     * Trata erros de validação de campos (@Valid).
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> handleValidationException(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request) {
+        
+        String mensagem = "Erro de validação: " + ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .reduce("", (acc, curr) -> acc.isEmpty() ? curr : acc + ", " + curr);
+        
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                mensagem,
+                LocalDateTime.now(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.badRequest().body(errorResponse);
+    }
+
+    /**
+     * Trata violação de integridade (ex: e-mail já cadastrado).
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<?> handleDataIntegrityException(
+            DataIntegrityViolationException ex,
+            HttpServletRequest request) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "Conflito de dados: O registro já existe ou viola uma regra de negócio.",
+                LocalDateTime.now(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
+    /**
      * Trata exceções genéricas e retorna erro 500.
-     *
-     * Qualquer exceção não tratada especificamente é capturada aqui
-     * para evitar retornar responses não padronizadas.
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGenericException(

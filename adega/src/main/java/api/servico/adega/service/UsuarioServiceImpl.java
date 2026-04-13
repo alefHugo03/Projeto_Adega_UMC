@@ -6,9 +6,9 @@ import api.servico.adega.exception.ResourceNotFoundException;
 import api.servico.adega.model.Usuario;
 import api.servico.adega.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Implementação do service de usuário.
@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
  * e os objetos de transferência de dados (DTOs).
  */
 @Service
+@Transactional(readOnly = true)
 public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
@@ -33,7 +34,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuarioRepository.findAll()
                 .stream()
                 .map(this::toResponseDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -50,7 +51,12 @@ public class UsuarioServiceImpl implements UsuarioService {
      * Cria um novo usuário usando os dados do request DTO.
      */
     @Override
+    @Transactional
     public UsuarioResponseDTO criarUsuario(UsuarioRequestDTO usuarioRequestDTO) {
+        if (usuarioRepository.existsByEmail(usuarioRequestDTO.getEmail())) {
+            throw new RuntimeException("E-mail já cadastrado no sistema.");
+        }
+
         Usuario usuario = toEntity(usuarioRequestDTO);
         Usuario salvo = usuarioRepository.save(usuario);
         return toResponseDTO(salvo);
@@ -60,9 +66,17 @@ public class UsuarioServiceImpl implements UsuarioService {
      * Atualiza um usuário existente com os dados recebidos.
      */
     @Override
+    @Transactional
     public UsuarioResponseDTO atualizarUsuario(Long id, UsuarioRequestDTO usuarioRequestDTO) {
         Usuario usuarioExistente = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
+
+        // Verifica se o e-mail mudou e se o novo já existe para outro usuário
+        if (!usuarioExistente.getEmail().equals(usuarioRequestDTO.getEmail()) &&
+                usuarioRepository.existsByEmail(usuarioRequestDTO.getEmail())) {
+            throw new RuntimeException("O novo e-mail já está em uso por outro usuário.");
+        }
+
         usuarioExistente.setNome(usuarioRequestDTO.getNome());
         usuarioExistente.setEmail(usuarioRequestDTO.getEmail());
         Usuario atualizado = usuarioRepository.save(usuarioExistente);
@@ -73,6 +87,7 @@ public class UsuarioServiceImpl implements UsuarioService {
      * Exclui um usuário existente. Se o usuário não for encontrado, lança exceção.
      */
     @Override
+    @Transactional
     public void excluirUsuario(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
@@ -87,7 +102,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuarioRepository.findByNomeContainingIgnoreCase(nome)
                 .stream()
                 .map(this::toResponseDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
