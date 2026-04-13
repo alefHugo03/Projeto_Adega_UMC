@@ -8,9 +8,12 @@ function Usuarios() {
   const [loading, setLoading] = useState(true); // Estado para controlar o carregamento
   const [error, setError] = useState(null); // Estado para armazenar erros
 
+  // Define a URL base da API (Usa variável de ambiente ou fallback para localhost)
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
   // useEffect para buscar os usuários quando o componente é montado
   useEffect(() => {
-    axios.get('/api/usuarios') // Requisição para o endpoint de usuários (proxy para o backend)
+    axios.get(`${API_URL}/api/usuarios`) // Requisição para o endpoint completo
       .then(response => {
         setUsuarios(response.data); // Atualiza o estado com os dados recebidos
         setLoading(false); // Desativa o loading

@@ -1,8 +1,8 @@
-.vscode
 autosave.chc
 config.chc
 brModelo.jar
 .github/
 .env
 
-noce_modules
+node_modules/
+.vscode/
