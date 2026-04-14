@@ -1,5 +1,7 @@
 # Projeto Adega UMC
 
+[![CI - Adega UMC](https://github.com/seu-usuario/Projeto_Adega_UMC/actions/workflows/ci.yml/badge.svg)](https://github.com/seu-usuario/Projeto_Adega_UMC/actions/workflows/ci.yml)
+
 O **Projeto Adega UMC** é uma aplicação Full Stack robusta desenvolvida para o gerenciamento de uma adega. O sistema permite o controle de usuários e integra uma API REST moderna com uma interface web responsiva, servindo como projeto acadêmico para a Universidade de Mogi das Cruzes.
 
 ## 🚀 Funcionalidades
@@ -61,12 +63,14 @@ Para rodar o projeto, você precisará de:
    cd Projeto_Adega_UMC
    ```
 
-2. Suba o ambiente completo:
+2. Configure as variáveis de ambiente no arquivo `.env` (baseado no docker-compose.yml).
+
+3. Suba o ambiente completo:
    ```bash
    docker compose up --build
    ```
 
-3. URLs de acesso:
+4. URLs de acesso:
    - **Frontend**: http://localhost:5173
    - **API Backend**: http://localhost:8080
    - **Swagger UI**: http://localhost:8080/swagger-ui.html
