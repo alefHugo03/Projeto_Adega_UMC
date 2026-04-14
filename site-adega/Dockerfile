@@ -1,15 +1,16 @@
-FROM node:20-alpine
+FROM node:20-bookworm-slim
 
 WORKDIR /app
 
 # Copia as dependências e instala antes do restante do código para aproveitar cache.
 COPY package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps && npm cache clean --force
 
 COPY . .
 
-# Porta padrão do Vite.
-EXPOSE 5173
+# Define a porta interna padrão, mas permite que seja sobrescrita.
+ENV PORT=5173
+EXPOSE ${PORT}
 
-# Inicia o servidor de desenvolvimento do frontend na porta 5173 e expõe em 0.0.0.0 para o host.
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
+# Usa a variável PORT para iniciar o Vite.
+CMD ["sh", "-c", "npm run dev -- --host 0.0.0.0 --port ${PORT}"]
