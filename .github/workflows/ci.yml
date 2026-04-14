@@ -7,6 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
+  # Validação do Backend (Java 21 + Maven)
   backend:
     name: Backend Build & Test
     runs-on: ubuntu-latest
@@ -19,9 +20,10 @@ jobs:
           distribution: 'temurin'
           cache: maven
       - name: Build with Maven
-        # Com o arquivo application.properties em src/test/resources, o Maven usará H2 automaticamente
+        # Os testes agora usarão o H2 configurado em src/test/resources
         run: mvn -f adega/pom.xml clean package
 
+  # Validação do Frontend (Node + React/Vite)
   frontend:
     name: Frontend Build
     runs-on: ubuntu-latest
@@ -34,20 +36,18 @@ jobs:
       - name: Install and Build
         run: |
           cd site-adega
-          # --legacy-peer-deps ignora conflitos de versão do ESLint no ambiente de CI
+          # --legacy-peer-deps resolve o erro ERESOLVE do ESLint
           npm install --legacy-peer-deps
           npm run build --if-present
 
+  # Verificação do Docker Compose
   docker:
     name: Docker Verify
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Create dummy .env for build validation
-        run: |
-          echo "MYSQL_ROOT_PASSWORD=ci_test" > .env
-          echo "MYSQL_DATABASE=adega" >> .env
-          echo "MYSQL_USER=ci_user" >> .env
-          echo "MYSQL_PASSWORD=ci_pass" >> .env
       - name: Build Docker Images
-        run: docker compose build
+        # Valida se o docker-compose.yml e os Dockerfiles estão corretos
+        run: |
+          echo "MYSQL_ROOT_PASSWORD=test" > .env
+          docker compose build
