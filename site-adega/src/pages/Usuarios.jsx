@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 
 // Componente para exibir a lista de usuários
 // Faz uma requisição GET para /api/usuarios e exibe os dados em uma lista
@@ -8,12 +8,9 @@ function Usuarios() {
   const [loading, setLoading] = useState(true); // Estado para controlar o carregamento
   const [error, setError] = useState(null); // Estado para armazenar erros
 
-  // Define a URL base da API (Usa variável de ambiente ou fallback para localhost)
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
-
   // useEffect para buscar os usuários quando o componente é montado
   useEffect(() => {
-    axios.get(`${API_URL}/api/usuarios`) // Requisição para o endpoint completo
+    api.get('/usuarios') // Removido o '/api' redundante
       .then(response => {
         setUsuarios(response.data); // Atualiza o estado com os dados recebidos
         setLoading(false); // Desativa o loading
@@ -25,22 +22,25 @@ function Usuarios() {
       });
   }, []); // Array vazio significa que roda apenas uma vez, no mount
 
-  // Renderização condicional baseada no estado
-  if (loading) return <p>Carregando...</p>; // Mostra loading enquanto carrega
-  if (error) return <p>{error}</p>; // Mostra erro se houver
-
-  // Renderiza a lista de usuários
+  // Renderiza a estrutura da página com pré-carregamento (Skeleton/Loading)
   return (
-    <div>
+    <main style={{ minHeight: '60vh', padding: '0 1rem' }}>
       <h1>Lista de Usuários</h1>
-      <ul>
-        {usuarios.map(usuario => (
-          <li key={usuario.id}> {/* Chave única para cada item da lista */}
-            {usuario.nome} - {usuario.email} {/* Exibe nome e email do usuário */}
-          </li>
-        ))}
-      </ul>
-    </div>
+      
+      {loading ? (
+        <p>⏳ Carregando dados do servidor...</p>
+      ) : error ? (
+        <p style={{ color: 'red' }}>{error}</p>
+      ) : (
+        <ul>
+          {usuarios.map(usuario => (
+            <li key={usuario.id}>
+              <strong>{usuario.nome}</strong> - {usuario.email}
+            </li>
+          ))}
+        </ul>
+      )}
+    </main>
   );
 }
 

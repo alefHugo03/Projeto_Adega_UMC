@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -68,6 +69,7 @@ public class UsuarioController {
      */
     @PostMapping
     public ResponseEntity<UsuarioResponseDTO> criarUsuario(@RequestBody UsuarioRequestDTO usuarioRequestDTO) {
+    public ResponseEntity<UsuarioResponseDTO> criarUsuario(@Valid @RequestBody UsuarioRequestDTO usuarioRequestDTO) {
         UsuarioResponseDTO criado = usuarioService.criarUsuario(usuarioRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(criado);
     }
@@ -78,6 +80,7 @@ public class UsuarioController {
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioResponseDTO> atualizarUsuario(@PathVariable Long id,
                                                                @RequestBody UsuarioRequestDTO usuarioRequestDTO) {
+                                                               @Valid @RequestBody UsuarioRequestDTO usuarioRequestDTO) {
         return ResponseEntity.ok(usuarioService.atualizarUsuario(id, usuarioRequestDTO));
     }
 

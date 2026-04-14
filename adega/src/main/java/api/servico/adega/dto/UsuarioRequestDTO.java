@@ -1,21 +1,18 @@
 package api.servico.adega.dto;
 
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * DTO usado para receber os dados de criação ou atualização de usuário.
- *
- * Esse objeto representa apenas os campos que o cliente envia na requisição.
- */
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class UsuarioRequestDTO {
 
+    @NotBlank(message = "O nome é obrigatório")
     private String nome;
+
+    @NotBlank(message = "O e-mail é obrigatório")
+    @Email(message = "E-mail inválido")
     private String email;
 }

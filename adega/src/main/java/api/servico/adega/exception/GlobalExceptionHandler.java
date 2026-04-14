@@ -1,10 +1,14 @@
 package api.servico.adega.exception;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.dao.DataIntegrityViolationException;
 
@@ -46,23 +50,25 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     /**
      * Trata erros de validação de campos (@Valid).
      */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> handleValidationException(
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex,
-            HttpServletRequest request) {
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request) {
         
         String mensagem = "Erro de validação: " + ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .reduce("", (acc, curr) -> acc.isEmpty() ? curr : acc + ", " + curr);
         
         ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
+                status.value(),
                 mensagem,
                 LocalDateTime.now(),
-                request.getRequestURI()
+                request.getDescription(false).replace("uri=", "")
         );
 
-        return ResponseEntity.badRequest().body(errorResponse);
+        return ResponseEntity.status(status).body(errorResponse);
     }
 
     /**
@@ -84,18 +90,38 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
+     * Trata ResponseStatusException (ex: o conflito de e-mail que lançamos no service).
+     */
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<?> handleResponseStatusException(
+            ResponseStatusException ex,
+            WebRequest request) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                ex.getStatusCode().value(),
+                ex.getReason(),
+                LocalDateTime.now(),
+                request.getDescription(false).replace("uri=", "")
+        );
+
+        return ResponseEntity.status(ex.getStatusCode()).body(errorResponse);
+    }
+
+    /**
      * Trata exceções genéricas e retorna erro 500.
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGenericException(
             Exception ex,
-            HttpServletRequest request) {
+            WebRequest request) {
+
+        ex.printStackTrace(); // Adicione isso para ver o erro real nos logs do Docker
 
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Ocorreu um erro interno na aplicação.",
                 LocalDateTime.now(),
-                request.getRequestURI()
+                request.getDescription(false).replace("uri=", "")
         );
 
         return ResponseEntity

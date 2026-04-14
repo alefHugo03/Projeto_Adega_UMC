@@ -5,8 +5,10 @@ import api.servico.adega.dto.UsuarioResponseDTO;
 import api.servico.adega.exception.ResourceNotFoundException;
 import api.servico.adega.model.Usuario;
 import api.servico.adega.repository.UsuarioRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -54,7 +56,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Transactional
     public UsuarioResponseDTO criarUsuario(UsuarioRequestDTO usuarioRequestDTO) {
         if (usuarioRepository.existsByEmail(usuarioRequestDTO.getEmail())) {
-            throw new RuntimeException("E-mail já cadastrado no sistema.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "E-mail já cadastrado no sistema.");
         }
 
         Usuario usuario = toEntity(usuarioRequestDTO);
@@ -74,7 +76,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         // Verifica se o e-mail mudou e se o novo já existe para outro usuário
         if (!usuarioExistente.getEmail().equals(usuarioRequestDTO.getEmail()) &&
                 usuarioRepository.existsByEmail(usuarioRequestDTO.getEmail())) {
-            throw new RuntimeException("O novo e-mail já está em uso por outro usuário.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "O novo e-mail já está em uso por outro usuário.");
         }
 
         usuarioExistente.setNome(usuarioRequestDTO.getNome());

@@ -30,11 +30,10 @@ services:
       db:
         condition: service_healthy
     environment:
-      - DB_HOST=db
-      - DB_PORT=3306
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/${MYSQL_DATABASE}?createDatabaseIfNotExist=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=${MYSQL_USER}
+      - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
 
   site:
     # Constrói o frontend React/Vite a partir do diretório ./site-adega.
@@ -46,7 +45,7 @@ services:
       - VITE_HOST=0.0.0.0 # Garante que o Vite aceite conexões externas ao container
       - NODE_ENV=development
       - PORT=5173
-      - VITE_API_URL=http://localhost:8080
+      - VITE_API_URL=/api
     command: npm run dev -- --host 0.0.0.0
 
 volumes:
