@@ -68,7 +68,6 @@ public class UsuarioController {
      * Recebe um DTO de criação de usuário e devolve o usuário criado.
      */
     @PostMapping
-    public ResponseEntity<UsuarioResponseDTO> criarUsuario(@RequestBody UsuarioRequestDTO usuarioRequestDTO) {
     public ResponseEntity<UsuarioResponseDTO> criarUsuario(@Valid @RequestBody UsuarioRequestDTO usuarioRequestDTO) {
         UsuarioResponseDTO criado = usuarioService.criarUsuario(usuarioRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(criado);
@@ -78,9 +77,8 @@ public class UsuarioController {
      * Atualiza um usuário existente com base no ID e nos dados recebidos.
      */
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioResponseDTO> atualizarUsuario(@PathVariable Long id,
-                                                               @RequestBody UsuarioRequestDTO usuarioRequestDTO) {
-                                                               @Valid @RequestBody UsuarioRequestDTO usuarioRequestDTO) {
+    public ResponseEntity<UsuarioResponseDTO> atualizarUsuario(
+        @PathVariable Long id, @Valid @RequestBody UsuarioRequestDTO usuarioRequestDTO) {
         return ResponseEntity.ok(usuarioService.atualizarUsuario(id, usuarioRequestDTO));
     }
 
