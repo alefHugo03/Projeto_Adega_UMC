@@ -6,8 +6,9 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.2.5</version>
-		<relativePath/> </parent>
+		<version>4.0.6</version>
+		<relativePath/>
+	</parent>
 
 	<groupId>api.servico</groupId>
 	<artifactId>adega</artifactId>
@@ -34,13 +35,14 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
+			<version>1.18.46</version>
 			<optional>true</optional>
 		</dependency>
 		<!-- Para o Swagger/OpenAPI -->
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-			<version>2.5.0</version>
+			<version>3.0.3</version>
 		</dependency>
 		<!-- Para o Banco de Dados MySQL -->
 		<dependency>
@@ -77,7 +79,7 @@
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
-							<version>1.18.32</version>
+							<version>1.18.46</version>
 						</path>
 					</annotationProcessorPaths>
 					<compilerArgs>
