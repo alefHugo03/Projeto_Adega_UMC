@@ -35,18 +35,5 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
 
-  site:
-    # Constrói o frontend React/Vite a partir do diretório ./site-adega.
-    build: ./site-adega
-    container_name: adega_site
-    ports:
-      - "${SITE_PORT_HOST:-5173}:5173"
-    environment:
-      - VITE_HOST=0.0.0.0 # Garante que o Vite aceite conexões externas ao container
-      - NODE_ENV=development
-      - PORT=5173
-      - VITE_API_URL=/api
-    command: npm run dev -- --host 0.0.0.0
-
 volumes:
   db_data: # Volume nomeado para armazenar dados do MySQL.
