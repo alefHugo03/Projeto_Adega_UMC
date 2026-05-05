@@ -1,7 +1,7 @@
 package api.servico.adega.controller;
 
-import api.servico.adega.dto.UsuarioRequestDTO;
-import api.servico.adega.dto.UsuarioResponseDTO;
+import api.servico.adega.dto.requests.UsuarioRequestDTO;
+import api.servico.adega.dto.responses.UsuarioResponseDTO;
 import api.servico.adega.service.UsuarioService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

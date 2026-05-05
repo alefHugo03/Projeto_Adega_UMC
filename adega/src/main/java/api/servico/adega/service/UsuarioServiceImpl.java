@@ -1,7 +1,7 @@
 package api.servico.adega.service;
 
-import api.servico.adega.dto.UsuarioRequestDTO;
-import api.servico.adega.dto.UsuarioResponseDTO;
+import api.servico.adega.dto.requests.UsuarioRequestDTO;
+import api.servico.adega.dto.responses.UsuarioResponseDTO;
 import api.servico.adega.exception.ResourceNotFoundException;
 import api.servico.adega.model.Usuario;
 import api.servico.adega.repository.UsuarioRepository;

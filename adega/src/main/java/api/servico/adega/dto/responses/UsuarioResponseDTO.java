@@ -1,4 +1,4 @@
-package api.servico.adega.dto;
+package api.servico.adega.dto.responses;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,5 +1,7 @@
 package api.servico.adega.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import api.servico.adega.model.Venda;

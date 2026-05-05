@@ -1,4 +1,4 @@
-package api.servico.adega.dto;
+package api.servico.adega.dto.requests;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

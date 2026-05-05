@@ -1,4 +1,4 @@
-package api.servico.adega.model;
+    package api.servico.adega.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
