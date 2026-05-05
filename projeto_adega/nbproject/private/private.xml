@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>file:/C:/Users/Richard%20Goxtoso/Documents/NetBeansProjects/projeto_adega/src/app/Main.java</file>
+            <file>file:/C:/Users/Richard%20Goxtoso/Documents/NetBeansProjects/projeto_adega/src/connection/ConnectionFactory.java</file>
+            <file>file:/C:/Users/Richard%20Goxtoso/Documents/NetBeansProjects/projeto_adega/src/dao/ProdutoDAO.java</file>
+            <file>file:/C:/Users/Richard%20Goxtoso/Documents/NetBeansProjects/projeto_adega/src/dao/UsuarioDAO.java</file>
+            <file>file:/C:/Users/Richard%20Goxtoso/Documents/NetBeansProjects/projeto_adega/src/model/Produto.java</file>
+            <file>file:/C:/Users/Richard%20Goxtoso/Documents/NetBeansProjects/projeto_adega/src/model/Usuario.java</file>
+            <file>file:/C:/Users/Richard%20Goxtoso/Documents/NetBeansProjects/projeto_adega/src/view/CadastroProduto.java</file>
+            <file>file:/C:/Users/Richard%20Goxtoso/Documents/NetBeansProjects/projeto_adega/src/view/ListaProduto.java</file>
+            <file>file:/C:/Users/Richard%20Goxtoso/Documents/NetBeansProjects/projeto_adega/src/view/Login.java</file>
+            <file>file:/C:/Users/Richard%20Goxtoso/Documents/NetBeansProjects/projeto_adega/src/view/Menu.java</file>
+        </group>
+    </open-files>
+</project-private>

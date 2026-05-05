@@ -9,7 +9,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Usuario {
+public class    Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,4 +20,6 @@ public class Usuario {
 
     @Column(nullable = false, unique = true)
     private String email;
+
+    private boolean isActive;
 }

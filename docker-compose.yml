@@ -2,7 +2,7 @@ services:
   db:
     # Usa a imagem oficial do MySQL 8 para o banco de dados.
     image: mysql:8.0
-    container_name: adega_db
+    container_name: adega_banco
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -22,7 +22,7 @@ services:
   api:
     # Constrói o backend Java a partir do diretório ./adega.
     build: ./adega
-    container_name: adega_api
+    container_name: adega_server
     restart: on-failure
     ports:
       - "${API_PORT_HOST:-8080}:8080"
