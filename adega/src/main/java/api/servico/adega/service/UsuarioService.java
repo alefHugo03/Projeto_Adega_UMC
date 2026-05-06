@@ -33,7 +33,7 @@ public interface UsuarioService {
      */
     UsuarioResponseDTO atualizarUsuario(Long id, UsuarioRequestDTO usuarioRequestDTO);
 
-    /**
+    /*
      * Exclui um usuário pelo ID.
      */
     void excluirUsuario(Long id);

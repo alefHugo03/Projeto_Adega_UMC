@@ -1,10 +1,12 @@
-package api.servico.adega.service;
+package api.servico.adega.service.impl;
 
 import api.servico.adega.dto.requests.UsuarioRequestDTO;
 import api.servico.adega.dto.responses.UsuarioResponseDTO;
 import api.servico.adega.exception.ResourceNotFoundException;
 import api.servico.adega.model.Usuario;
 import api.servico.adega.repository.UsuarioRepository;
+import api.servico.adega.service.UsuarioService;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

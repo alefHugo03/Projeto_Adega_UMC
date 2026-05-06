@@ -1,16 +1,8 @@
 package api.servico.adega.repository;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+
 import api.servico.adega.model.Estoque;
 
-import java.util.Optional;
-
-
-public interface EstoqueRepository {
-    
-    Optional<Estoque> findById(Long id);
-
-    /**
-     * Verifica se já existe usuário com o email informado.
-     */
-    boolean existsById(Long id);
+public interface EstoqueRepository extends JpaRepository<Estoque, Long> {
 }

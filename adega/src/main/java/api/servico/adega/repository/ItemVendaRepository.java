@@ -1,10 +1,7 @@
 package api.servico.adega.repository;
 
 import api.servico.adega.model.ItemVenda;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Optional;
-
-public interface ItemVendaRepository {
-    
-    Optional<ItemVenda> findById(Long id);
+public interface ItemVendaRepository extends JpaRepository<ItemVenda, Long> {
 }
