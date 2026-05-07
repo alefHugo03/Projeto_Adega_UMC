@@ -1,6 +1,6 @@
 package api.servico.adega.dto.responses;
 
-import lombok.AllArgsConstructor;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class VendaResponseDTO {
 
     private Long idVenda;
@@ -18,4 +17,12 @@ public class VendaResponseDTO {
     private LocalDateTime dataVenda;
     private BigDecimal valorTotal;
     private UsuarioResponseDTO user;
+
+    public VendaResponseDTO(Long idVenda, String formaPagamento, LocalDateTime dataVenda, BigDecimal valorTotal, UsuarioResponseDTO user) {
+        this.idVenda = idVenda;
+        this.formaPagamento = formaPagamento;
+        this.dataVenda = dataVenda;
+        this.valorTotal = valorTotal;
+        this.user = user;
+    }
 }

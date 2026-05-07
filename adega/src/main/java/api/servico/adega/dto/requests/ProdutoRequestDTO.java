@@ -1,4 +1,4 @@
-﻿package api.servico.adega.dto.requests;
+package api.servico.adega.dto.requests;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

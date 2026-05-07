@@ -1,6 +1,5 @@
 package api.servico.adega.dto.responses;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,10 +7,15 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class EstoqueResponseDTO {
 
     private Long idEstoque;
-    private Long idProduto;
+    private ProdutoResponseDTO produto;
     private int quantidade;
+
+    public EstoqueResponseDTO(Long idEstoque, ProdutoResponseDTO produto, int quantidade) {
+        this.idEstoque = idEstoque;
+        this.produto = produto;
+        this.quantidade = quantidade;
+    }
 }

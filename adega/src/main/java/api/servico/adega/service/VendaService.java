@@ -13,7 +13,7 @@ public interface VendaService {
     /* 
     * Lista todas as vendas
     */
-    List<VendaResponseDTO> listarVendar();
+    List<VendaResponseDTO> listarVenda();
 
     /*
     * Buscar por ID
@@ -38,7 +38,7 @@ public interface VendaService {
     void excluirVenda(Long id);
 
     /*
-    * Pesquisar a vendo por data 
+    * Pesquisar a venda por data
     */
     List<VendaResponseDTO> buscarPorData(String data);
 

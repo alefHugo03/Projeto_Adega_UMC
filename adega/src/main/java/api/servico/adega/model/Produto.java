@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.math.BigDecimal;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,5 +25,5 @@ public class Produto {
     private String tipoProduto;
 
     @Column(name = "valor_unitario")
-    private String valorUnitario;
+    private BigDecimal valorUnitario;
 }

@@ -1,0 +1,1 @@
+-- Dados iniciais serão carregados pelo UsuarioDataLoader

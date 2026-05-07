@@ -18,12 +18,14 @@ public class ItemVenda {
     private Long idItemVenda;
 
 
-    @Column(name = "id_venda")
-    private Long idVenda;
+    @ManyToOne
+    @JoinColumn(name = "id_venda")
+    private Venda venda;
 
     // Identificação do produto
-    @Column(name = "id_produto")
-    private Long idProduto;
+    @ManyToOne
+    @JoinColumn(name = "id_produto")
+    private Produto produto;
 
     private int quantidadeVendida;
 
