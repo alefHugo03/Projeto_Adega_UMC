@@ -21,7 +21,7 @@ public class OpenApiConfig {
                 .info(new Info()
                         .title("API Adega")
                         .description("Documentação da API de gerenciamento de usuários da Adega")
-                        .version("v1")
+                        .version("v2")
                         .contact(new Contact()
                                 .name("Adega API")
                                 .email("contato@adega.com.br"))

@@ -60,7 +60,7 @@ public class ProdutoServiceImpl implements ProdutoService {
             throw new ResourceNotFoundException("produto", "nomeProduto", nomeProduto);
         }
 
-        return produto.stream()
+        return List.of(produto.get()).stream()
                 .map(this::toResponseDTO)
                 .toList();
     }
@@ -92,7 +92,7 @@ public class ProdutoServiceImpl implements ProdutoService {
                 .orElseThrow(() -> new ResourceNotFoundException("produto", "id", id));
         produtoExiste.setTipoProduto(produtoRequestDTO.getTipoProduto());
         produtoExiste.setNomeProduto(produtoRequestDTO.getNomeProduto());
-        produtoExiste.setValorUnitario(String.valueOf(new BigDecimal(produtoRequestDTO.getValorUnitario())));
+        produtoExiste.setValorUnitario(new BigDecimal(produtoRequestDTO.getValorUnitario()).toString());
 
         Produto atualizado = produtoRepository.save(produtoExiste);
 
@@ -121,7 +121,7 @@ public class ProdutoServiceImpl implements ProdutoService {
         Produto produto = new Produto();
         produto.setTipoProduto(dto.getTipoProduto());
         produto.setNomeProduto(dto.getNomeProduto());
-        produto.setValorUnitario(String.valueOf(new BigDecimal(dto.getValorUnitario())));
+        produto.setValorUnitario(new BigDecimal(dto.getValorUnitario()).toString());
 
         return produto;
     }

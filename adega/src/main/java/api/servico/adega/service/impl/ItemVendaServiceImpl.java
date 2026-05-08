@@ -13,6 +13,7 @@ import api.servico.adega.dto.responses.UsuarioResponseDTO;
 import api.servico.adega.dto.responses.VendaResponseDTO;
 import api.servico.adega.exception.ConflictException;
 import api.servico.adega.exception.ResourceNotFoundException;
+import api.servico.adega.model.Usuario;
 import api.servico.adega.model.ItemVenda;
 import api.servico.adega.repository.ItemVendaRepository;
 import api.servico.adega.repository.ProdutoRepository;
@@ -118,7 +119,7 @@ public class ItemVendaServiceImpl implements ItemVendaService {
         );
     }
 
-    private UsuarioResponseDTO toUsuarioResponseDTO(api.servico.adega.model.Usuario usuario) {
+    private UsuarioResponseDTO toUsuarioResponseDTO(Usuario usuario) {
         return new UsuarioResponseDTO(
                 usuario.getId(),
                 usuario.getNome(),

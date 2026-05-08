@@ -2,15 +2,18 @@ package api.servico.adega.service.impl;
 
 import api.servico.adega.dto.requests.UsuarioRequestDTO;
 import api.servico.adega.dto.responses.UsuarioResponseDTO;
+import api.servico.adega.exception.ConflictException;
 import api.servico.adega.exception.ResourceNotFoundException;
 import api.servico.adega.model.Usuario;
 import api.servico.adega.repository.UsuarioRepository;
 import api.servico.adega.service.UsuarioService;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -22,12 +25,26 @@ import java.util.List;
  */
 @Service
 @Transactional(readOnly = true)
-public class UsuarioServiceImpl implements UsuarioService {
+public class UsuarioServiceImpl implements UsuarioService, UserDetailsService {
 
     private final UsuarioRepository usuarioRepository;
 
-    public UsuarioServiceImpl(UsuarioRepository usuarioRepository) {
+    private final PasswordEncoder passwordEncoder;
+
+    
+    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        // Substituímos a exceção genérica do Spring pela sua 'ResourceNotFoundException'.
+        // Isso garante que o erro seja capturado pelo seu GlobalExceptionHandler, retornando um JSON padronizado.
+        // O retorno do tipo 'Usuario' agora é aceito como 'UserDetails' porque implementamos a interface na Model.
+        Usuario usuario = usuarioRepository.findByEmail(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "email", username));
+        return usuario;
     }
 
     /**
@@ -58,10 +75,13 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Transactional
     public UsuarioResponseDTO criarUsuario(UsuarioRequestDTO usuarioRequestDTO) {
         if (usuarioRepository.existsByEmail(usuarioRequestDTO.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "E-mail já cadastrado no sistema.");
+            throw new ConflictException("E-mail já cadastrado no sistema.");
         }
 
         Usuario usuario = toEntity(usuarioRequestDTO);
+        // Criptografa a senha antes de salvar
+        usuario.setSenha(passwordEncoder.encode(usuarioRequestDTO.getSenha()));
+        
         Usuario salvo = usuarioRepository.save(usuario);
         return toResponseDTO(salvo);
     }
@@ -78,7 +98,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         // Verifica se o e-mail mudou e se o novo já existe para outro usuário
         if (!usuarioExistente.getEmail().equals(usuarioRequestDTO.getEmail()) &&
                 usuarioRepository.existsByEmail(usuarioRequestDTO.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "O novo e-mail já está em uso por outro usuário.");
+            throw new ConflictException("O novo e-mail já está em uso por outro usuário.");
         }
 
         usuarioExistente.setNome(usuarioRequestDTO.getNome());

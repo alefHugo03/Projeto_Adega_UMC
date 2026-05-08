@@ -7,15 +7,16 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UsuarioRequestDTO {
-
-    @NotBlank(message = "O nome é obrigatório")
-    private String nome;
-
-    @NotBlank(message = "O e-mail é obrigatório")
+public class LoginRequestDTO {
+    @NotBlank(message = "O e-mail e a senha são obrigatórios")
     @Email(message = "E-mail inválido")
     private String email;
-
-    @NotBlank(message = "A senha é obrigatória")
+    
+    @NotBlank(message = "O e-mail e a senha são obrigatórios")
     private String senha;
+
+    public LoginRequestDTO(String email, String senha) {
+        this.email = email;
+        this.senha = senha;
+    }
 }
