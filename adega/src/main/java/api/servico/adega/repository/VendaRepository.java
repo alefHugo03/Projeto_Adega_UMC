@@ -1,6 +1,6 @@
 package api.servico.adega.repository;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,7 +21,7 @@ public interface VendaRepository extends JpaRepository<Venda, Long>{
     @Override
     boolean existsById(Long id);
 
-    List<Venda> findByDataVenda(LocalDate data);
+    List<Venda> findByDataVendaBetween(LocalDateTime inicio, LocalDateTime fim);
 
     List<Venda> findByUser_Id(Long idUsuario);
 

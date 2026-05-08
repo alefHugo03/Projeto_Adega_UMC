@@ -48,7 +48,9 @@ public class VendaServiceImpl implements VendaService {
     @Override
     public List<VendaResponseDTO> buscarPorData(String data) {
         LocalDate dataConvertida = LocalDate.parse(data);
-        List<Venda> vendas = vendaRepository.findByDataVenda(dataConvertida);
+        LocalDateTime inicio = dataConvertida.atStartOfDay();
+        LocalDateTime fim = dataConvertida.atTime(23, 59, 59, 999_999_999);
+        List<Venda> vendas = vendaRepository.findByDataVendaBetween(inicio, fim);
 
         if (vendas.isEmpty()) {
             throw new ResourceNotFoundException("Venda", "data", data);
@@ -111,6 +113,10 @@ public class VendaServiceImpl implements VendaService {
         vendaRepository.delete(venda);
     }
 
+
+
+
+    
     private VendaResponseDTO toResponseDTO(Venda venda) {
         return new VendaResponseDTO(
                 venda.getIdVenda(),

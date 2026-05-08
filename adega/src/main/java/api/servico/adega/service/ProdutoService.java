@@ -9,7 +9,7 @@ public interface ProdutoService {
 
     List<ProdutoResponseDTO> listarProdutos();
 
-    List<ProdutoResponseDTO> buscarPorId(Long id);
+    ProdutoResponseDTO buscarPorId(Long id);
 
     List<ProdutoResponseDTO> buscarPorTipoProduto(String tipoProduto);
 
@@ -22,5 +22,4 @@ public interface ProdutoService {
     ProdutoResponseDTO atualizarProduto(Long id, ProdutoRequestDTO produtoRequestDTO);
 
     void excluirProduto(Long id);
-
 }

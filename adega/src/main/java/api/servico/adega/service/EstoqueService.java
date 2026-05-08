@@ -10,6 +10,10 @@ public interface EstoqueService {
 
     List<EstoqueResponseDTO> buscarPorProduto(Long id);
 
+    List<EstoqueResponseDTO> buscarPorTipoProduto(String tipoProduto);
+
+    List<EstoqueResponseDTO> listarTodosEstoques();
+
     EstoqueResponseDTO adicionarAoEstoque(EstoqueResponseDTO estoqueResponseDTO);
 
     EstoqueResponseDTO  atualizarEstoque(Long id, EstoqueResponseDTO estoqueResponseDTO);

@@ -13,7 +13,7 @@ import api.servico.adega.model.Usuario;
 import api.servico.adega.model.Venda;
 import api.servico.adega.repository.EstoqueRepository;
 import api.servico.adega.repository.ItemVendaRepository;
-import api.servico.adega.repository.ProdutoRepositoy;
+import api.servico.adega.repository.ProdutoRepository;
 import api.servico.adega.repository.UsuarioRepository;
 import api.servico.adega.repository.VendaRepository;
 
@@ -25,13 +25,13 @@ import api.servico.adega.repository.VendaRepository;
 public class UsuarioDataLoader implements CommandLineRunner {
 
     private final UsuarioRepository usuarioRepository;
-    private final ProdutoRepositoy produtoRepository;
+    private final ProdutoRepository produtoRepository;
     private final EstoqueRepository estoqueRepository;
     private final VendaRepository vendaRepository;
     private final ItemVendaRepository itemVendaRepository;
 
     public UsuarioDataLoader(UsuarioRepository usuarioRepository,
-                            ProdutoRepositoy produtoRepository,
+                            ProdutoRepository produtoRepository,
                             EstoqueRepository estoqueRepository,
                             VendaRepository vendaRepository,
                             ItemVendaRepository itemVendaRepository) {
@@ -71,22 +71,22 @@ public class UsuarioDataLoader implements CommandLineRunner {
             Produto vinho1 = new Produto();
             vinho1.setNomeProduto("Vinho Tinto Reserva");
             vinho1.setTipoProduto("Tinto");
-            vinho1.setValorUnitario(new BigDecimal("85.00"));
+            vinho1.setValorUnitario(String.valueOf(new BigDecimal("85.00")));
 
             Produto vinho2 = new Produto();
             vinho2.setNomeProduto("Vinho Branco Chardonnay");
             vinho2.setTipoProduto("Branco");
-            vinho2.setValorUnitario(new BigDecimal("65.00"));
+            vinho2.setValorUnitario(String.valueOf(new BigDecimal("65.00")));
 
             Produto vinho3 = new Produto();
             vinho3.setNomeProduto("Vinho Rosé Premium");
             vinho3.setTipoProduto("Rosé");
-            vinho3.setValorUnitario(new BigDecimal("55.00"));
+            vinho3.setValorUnitario(String.valueOf(new BigDecimal("55.00")));
 
             Produto vinho4 = new Produto();
             vinho4.setNomeProduto("Espumante Brut");
             vinho4.setTipoProduto("Espumante");
-            vinho4.setValorUnitario(new BigDecimal("45.00"));
+            vinho4.setValorUnitario(String.valueOf(new BigDecimal("45.00")));
 
             produtoRepository.save(vinho1);
             produtoRepository.save(vinho2);
