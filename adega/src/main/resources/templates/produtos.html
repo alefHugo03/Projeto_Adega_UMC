@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Produtos - Adega UMC</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Controle de Estoque</h1>
+            <div class="header-actions">
+                <button onclick="location.href='/home'" class="btn btn-primary">Voltar</button>
+                <button onclick="window.logout()" class="btn btn-danger">Sair</button>
+            </div>
+        </header>
+
+        <main class="content">
+            <div class="card card-lg">
+                <h2>Lista de Produtos</h2>
+                <button onclick="window.prepararCriacao()" class="btn btn-primary" style="margin-bottom: 20px;">+ Adicionar Novo Produto</button>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Tipo</th>
+                                <th>Preço Unitário</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-produtos-body">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" th:src="@{/js/produtos/produtos.js}"></script>
+</body>
+</html>

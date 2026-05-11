@@ -29,6 +29,8 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Não guarda sessão, usa apenas JWT
                 .authorizeHttpRequests(req -> {
                     req.requestMatchers(HttpMethod.POST, "/auth/login").permitAll(); // Rota de login liberada
+                    req.requestMatchers(HttpMethod.GET, "/login", "/home", "/produtos").permitAll(); // Permite acessar as views sem token inicialmente
+                    req.requestMatchers("/css/**", "/js/**", "/img/**", "/resources/**").permitAll(); // Permite carregar arquivos estáticos, incluindo a pasta 'resources'
                     req.anyRequest().authenticated(); // Todas as outras bloqueadas exigindo token
                 })
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class) // Coloca nosso filtro antes do padrão do Spring

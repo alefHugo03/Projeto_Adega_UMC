@@ -1,0 +1,152 @@
+/* Variáveis de Personalização */
+:root {
+    --primary-color: #722f37; /* Vinho Tinto */
+    --primary-hover: #5a252c;
+    --bg-color: #f4f7f6;
+    --text-color: #333;
+    --text-muted: #666;
+    --white: #ffffff;
+    --border-color: #ddd;
+    --danger-color: #e74c3c;
+    --danger-hover: #c0392b;
+    --shadow: 0 8px 24px rgba(0,0,0,0.08); /* Sombra um pouco mais suave */
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-color);
+    margin: 0;
+    color: var(--text-color);
+}
+
+/* --- Layout Principal --- */
+.container { 
+    padding: 2rem; 
+    max-width: 1000px; 
+    margin: 0 auto; 
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 2rem;
+}
+
+header h1 {
+    margin: 0; /* Remove a margem do h1 para alinhar perfeitamente com os botões */
+}
+
+/* Agrupamento de botões no header */
+.header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+/* --- Componente Card --- */
+.card {
+    background: var(--white);
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Modificadores de Card (Use classes combinadas) */
+.card-sm {
+    max-width: 400px;
+    margin: 0 auto; /* Centraliza na tela */
+    text-align: center;
+}
+
+.card-lg {
+    max-width: 100%; /* Usa todo o espaço do container para a tabela */
+}
+
+/* Títulos e Textos */
+h1 { color: var(--primary-color); margin-bottom: 0.5rem; }
+p { color: var(--text-muted); margin-bottom: 2rem; }
+
+/* --- Botões (Refatorados para serem mais flexíveis) --- */
+.btn {
+    padding: 0.7rem 1.2rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    text-decoration: none;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.95rem;
+}
+
+.btn:active { transform: scale(0.98); } /* Efeito de clique */
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: var(--white);
+}
+
+.btn-primary:hover { background-color: var(--primary-hover); }
+
+.btn-danger {
+    background-color: var(--danger-color);
+    color: var(--white);
+}
+
+.btn-danger:hover { background-color: var(--danger-hover); }
+
+/* Classe utilitária para quando o botão precisar ocupar 100% (ex: Login, Adicionar Produto) */
+.btn-block {
+    width: 100%;
+}
+
+/* --- Tabelas --- */
+.table-container {
+    overflow-x: auto; /* Evita que a tabela quebre a tela em celulares */
+    margin-top: 1.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--white);
+}
+
+th, td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+th {
+    background-color: #f8f9fa;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+}
+
+tr:last-child td {
+    border-bottom: none; /* Remove a linha dupla no final da tabela */
+}
+
+tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* Mensagem de estado vazio (Erro ao carregar) */
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+    font-style: italic;
+}

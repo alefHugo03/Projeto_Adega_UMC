@@ -1,5 +1,6 @@
 package api.servico.adega.service.impl;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,8 +12,10 @@ import api.servico.adega.dto.requests.VendaRequestDTO;
 import api.servico.adega.dto.responses.UsuarioResponseDTO;
 import api.servico.adega.dto.responses.VendaResponseDTO;
 import api.servico.adega.exception.ResourceNotFoundException;
+import api.servico.adega.model.Produto;
 import api.servico.adega.model.Usuario;
 import api.servico.adega.model.Venda;
+import api.servico.adega.repository.ProdutoRepository;
 import api.servico.adega.repository.UsuarioRepository;
 import api.servico.adega.repository.VendaRepository;
 import api.servico.adega.service.VendaService;
@@ -23,10 +26,12 @@ public class VendaServiceImpl implements VendaService {
 
     private final VendaRepository vendaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final ProdutoRepository produtoRepository;
 
-    public VendaServiceImpl(VendaRepository vendaRepository, UsuarioRepository usuarioRepository) {
+    public VendaServiceImpl(VendaRepository vendaRepository, UsuarioRepository usuarioRepository, ProdutoRepository produtoRepository) {
         this.vendaRepository = vendaRepository;
         this.usuarioRepository = usuarioRepository;
+        this.produtoRepository = produtoRepository;
     }
 
 
@@ -86,7 +91,33 @@ public class VendaServiceImpl implements VendaService {
     @Override
     @Transactional
     public VendaResponseDTO criarVenda(VendaRequestDTO vendaRequestDTO){
-        Venda venda = toEntity(vendaRequestDTO);
+        Usuario usuario = usuarioRepository.findById(vendaRequestDTO.getIdUser())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", vendaRequestDTO.getIdUser()));
+
+        Venda venda = new Venda();
+        venda.setFormaPagamento(vendaRequestDTO.getFormaPagamento());
+        venda.setDataVenda(LocalDateTime.parse(vendaRequestDTO.getDataVenda()));
+        venda.setUser(usuario);
+
+        BigDecimal valorTotalCalculado = BigDecimal.ZERO;
+
+        // Cálculo automático do valor total baseado nos itens enviados
+        if (vendaRequestDTO.getItens() != null) {
+            for (VendaRequestDTO.ItemVendaRequestDTO itemDTO : vendaRequestDTO.getItens()) {
+                // Busca o produto para garantir o preço real do banco
+                Produto produto = produtoRepository.findById(itemDTO.getIdProduto())
+                        .orElseThrow(() -> new ResourceNotFoundException("Produto", "id", itemDTO.getIdProduto()));
+
+                // Como valorUnitario já é BigDecimal, não use 'new BigDecimal()'
+                BigDecimal preco = produto.getValorUnitario();
+                BigDecimal quantidade = new BigDecimal(itemDTO.getQuantidade());
+                
+                // Multiplica preço por quantidade e soma ao total
+                valorTotalCalculado = valorTotalCalculado.add(preco.multiply(quantidade));
+            }
+        }
+
+        venda.setValorTotal(valorTotalCalculado);
         Venda salvo = vendaRepository.save(venda);
         return toResponseDTO(salvo);
     }
@@ -97,7 +128,8 @@ public class VendaServiceImpl implements VendaService {
         Venda vendaExistente = vendaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Venda", "id", id));
 
-        vendaExistente.setValorTotal(vendaRequestDTO.getValorTotal());
+        // O valor total não é mais editado diretamente via DTO,
+        // pois ele depende do cálculo dos itens da venda.
         vendaExistente.setFormaPagamento(vendaRequestDTO.getFormaPagamento());
 
         Venda atualizado = vendaRepository.save(vendaExistente);
@@ -126,16 +158,5 @@ public class VendaServiceImpl implements VendaService {
                 new UsuarioResponseDTO(venda.getUser().getId(), venda.getUser().getNome(), venda.getUser().getEmail())
         );
 
-    }
-
-    private Venda toEntity(VendaRequestDTO dto) {
-        Venda venda = new Venda();
-        venda.setFormaPagamento(dto.getFormaPagamento());
-        venda.setValorTotal(dto.getValorTotal());
-        venda.setDataVenda(LocalDateTime.parse(dto.getDataVenda()));
-        Usuario usuario = usuarioRepository.findById(dto.getIdUser())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", dto.getIdUser()));
-        venda.setUser(usuario);
-        return venda;
     }
 }

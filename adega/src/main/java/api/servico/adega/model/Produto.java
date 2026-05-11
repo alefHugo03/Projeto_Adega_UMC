@@ -1,12 +1,17 @@
 package api.servico.adega.model;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
+import java.math.BigDecimal;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.math.BigDecimal;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,6 +33,4 @@ public class Produto {
     @Column(name = "valor_unitario")
     private BigDecimal valorUnitario;
 
-    public void setValorUnitario(@NotBlank(message = "O valor unitário é obrigatório") String valorUnitario) {
-    }
 }

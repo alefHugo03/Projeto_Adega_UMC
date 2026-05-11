@@ -79,6 +79,7 @@ public class ProdutoServiceImpl implements ProdutoService {
     }
 
     @Override
+    @Transactional
     public ProdutoResponseDTO criarProduto(ProdutoRequestDTO produtoRequestDTO) {
         Produto produto = toEntity(produtoRequestDTO);
         Produto salvo = produtoRepository.save(produto);
@@ -87,12 +88,14 @@ public class ProdutoServiceImpl implements ProdutoService {
     }
 
     @Override
+    @Transactional
     public ProdutoResponseDTO atualizarProduto(Long id, ProdutoRequestDTO produtoRequestDTO) {
         Produto produtoExiste = produtoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("produto", "id", id));
         produtoExiste.setTipoProduto(produtoRequestDTO.getTipoProduto());
         produtoExiste.setNomeProduto(produtoRequestDTO.getNomeProduto());
-        produtoExiste.setValorUnitario(new BigDecimal(produtoRequestDTO.getValorUnitario()).toString());
+        // Removido o .toString() pois o campo na entidade agora é BigDecimal
+        produtoExiste.setValorUnitario(new BigDecimal(produtoRequestDTO.getValorUnitario()));
 
         Produto atualizado = produtoRepository.save(produtoExiste);
 
@@ -100,6 +103,7 @@ public class ProdutoServiceImpl implements ProdutoService {
     }
 
     @Override
+    @Transactional
     public void excluirProduto(Long id) {
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("produto", "id", id));
@@ -121,7 +125,8 @@ public class ProdutoServiceImpl implements ProdutoService {
         Produto produto = new Produto();
         produto.setTipoProduto(dto.getTipoProduto());
         produto.setNomeProduto(dto.getNomeProduto());
-        produto.setValorUnitario(new BigDecimal(dto.getValorUnitario()).toString());
+        // Removido o .toString() para salvar como BigDecimal
+        produto.setValorUnitario(new BigDecimal(dto.getValorUnitario()));
 
         return produto;
     }

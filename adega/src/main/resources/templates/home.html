@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Adega UMC</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script>
+        // Guarda de Segurança
+        if (!localStorage.getItem('jwt_token')) {
+            window.location.href = '/login';
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Painel da Adega</h1>
+            <div class="header-actions">
+                <button onclick="window.logout()" class="btn btn-danger">Sair</button>
+            </div>
+        </header>
+        
+        <main class="content">
+            <div class="card card-sm">
+                <h2>Bem-vindo!</h2>
+                <p>O que você deseja fazer hoje?</p>
+                <div class="actions">
+                    <a href="/produtos" class="btn btn-primary">Ver Produtos</a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" th:src="@{/js/home/home.js}"></script>
+</body>
+</html>
