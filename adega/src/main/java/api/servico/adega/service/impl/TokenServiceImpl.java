@@ -49,6 +49,11 @@ public class TokenServiceImpl implements TokenService {
         }
     }
 
+    @Override
+    public String getSubject(String token) {
+        return validarToken(token);
+    }
+
     private Instant dataExpiracao() {
         return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
     }

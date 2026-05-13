@@ -1,5 +1,6 @@
 package api.servico.adega.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -11,29 +12,38 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig {
+public class SecurityConfigurations {
 
-    private final SecurityFilter securityFilter;
-
-    public SecurityConfig(SecurityFilter securityFilter) {
-        this.securityFilter = securityFilter;
-    }
+    @Autowired
+    private SecurityFilter securityFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(csrf -> csrf.disable())
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Não guarda sessão, usa apenas JWT
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> {
-                    req.requestMatchers(HttpMethod.POST, "/auth/login").permitAll(); // Rota de login liberada
-                    req.requestMatchers(HttpMethod.GET, "/login", "/home", "/produtos").permitAll(); // Permite acessar as views sem token inicialmente
-                    req.requestMatchers("/css/**", "/js/**", "/img/**", "/resources/**").permitAll(); // Permite carregar arquivos estáticos, incluindo a pasta 'resources'
-                    req.anyRequest().authenticated(); // Todas as outras bloqueadas exigindo token
+                    // Permite acesso ao login e recursos estáticos (CSS, JS)
+                    req.requestMatchers(HttpMethod.POST, "/auth/login").permitAll();
+                    req.requestMatchers(HttpMethod.GET, "/login", "/css/**", "/js/**", "/img/**").permitAll();
+                    
+                    // Exemplo: Permitir criação de usuário se necessário (cadastro público)
+                    // req.requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll();
+                    
+                    // Qualquer outra requisição deve estar autenticada
+                    req.anyRequest().authenticated();
                 })
-                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class) // Coloca nosso filtro antes do padrão do Spring
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")))
+                .logout(logout -> logout
+                        .logoutUrl("/auth/logout")
+                        .deleteCookies("jwt_token")
+                        .logoutSuccessUrl("/login")
+                )
+                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
@@ -44,6 +54,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); // Avisa o Spring para usar BCrypt para ler as senhas do banco
+        return new BCryptPasswordEncoder();
     }
 }

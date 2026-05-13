@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Estoque - Adega UMC</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"> <!-- Estilos gerais -->
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}"> <!-- Estilos de layout do dashboard -->
+    <link rel="stylesheet" th:href="@{/css/estoque.css}"> <!-- Estilos específicos da página de estoque -->
+</head>
+<body class="dashboard-body">
+    <div class="layout-wrapper">
+        <!-- Barra Lateral de Navegação -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Adega UMC</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a th:href="@{/home}">Dashboard</a>
+                <a th:href="@{/produtos}">Produtos</a>
+                <a th:href="@{/estoque}" class="active">Estoque</a>
+                <a th:href="@{/vendas}" >Vender</a>
+                <button class="btn-logout-sidebar" onclick="window.logout()">Sair</button>
+            </nav>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-info">
+                    <h1>Gerenciamento de Estoque</h1>
+                    <p>Monitore e ajuste a disponibilidade dos seus produtos.</p>
+                </div>
+                <button class="btn btn-primary" onclick="window.prepararEntrada()">+ Nova Entrada</button>
+            </header>
+
+            <section class="card table-card">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th>Quantidade</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-estoque-body">
+                            <!-- Conteúdo carregado dinamicamente via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script type="module" th:src="@{/js/estoque/estoque.js}"></script>
+</body>
+</html>

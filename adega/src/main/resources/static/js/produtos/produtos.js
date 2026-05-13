@@ -1,5 +1,6 @@
-import requisitarDados from '../pesquisa/query.js';
-import logout from '../common/logout.js'; 
+import requisitarDados from '../conection/query.js';
+import logout from '../conection/logout.js'; 
+import { abrirModal } from '../modules/modal.js';
 
 // Expõe as funções para o escopo global (necessário para o 'onclick' no HTML)
 window.logout = logout;
@@ -25,8 +26,8 @@ async function carregarProdutos() {
                     <td>${produto.tipoProduto}</td>
                     <td>${formatter.format(produto.valorUnitario)}</td>
                     <td>
-                        <button class="btn-edit" onclick="window.prepararEdicao(${produto.idProduto})">Editar</button>
-                        <button class="btn-delete" onclick="window.excluirProduto(${produto.idProduto})">Excluir</button>
+                        <button class="btn btn-primary btn-table-action" onclick="window.prepararEdicao('${produto.idProduto}')">Editar</button>
+                        <button class="btn btn-danger btn-table-action" onclick="window.excluirProduto('${produto.idProduto}')">Excluir</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -40,16 +41,29 @@ async function carregarProdutos() {
     }
 }
 
-// Funções de Ação expostas globalmente para o onclick do HTML
-
 window.prepararCriacao = () => {
-    // Aqui você pode abrir um modal ou redirecionar para um formulário
-    alert('Funcionalidade de abrir formulário de cadastro (POST).');
+    const form = document.getElementById('form-produto');
+    if (form) form.reset();
+    const idCampo = document.getElementById('produto-id');
+    if (idCampo) idCampo.value = '';
+    const titulo = document.getElementById('modal-produto-titulo');
+    if (titulo) titulo.textContent = "Novo Produto";
+    if (typeof abrirModal === 'function') abrirModal('modal-produto');
 };
 
-window.prepararEdicao = (id) => {
-    // Aqui você buscaria os dados do produto pelo ID e preencheria um formulário
-    alert(`Editar produto ID: ${id}. Aqui você carregaria os dados para edição (PUT).`);
+window.prepararEdicao = async (id) => {
+    try {
+        const produto = await requisitarDados(`/api/produtos/${id}`, 'GET');
+        document.getElementById('produto-id').value = produto.idProduto || produto.id || id;
+        document.getElementById('produto-nome').value = produto.nomeProduto;
+        document.getElementById('produto-tipo').value = produto.tipoProduto;
+        document.getElementById('produto-valor').value = produto.valorUnitario;
+        
+        document.getElementById('modal-produto-titulo').textContent = "Editar Produto";
+        if (typeof abrirModal === 'function') abrirModal('modal-produto');
+    } catch (error) {
+        alert('Erro ao carregar dados do produto.');
+    }
 };
 
 window.excluirProduto = async (id) => {

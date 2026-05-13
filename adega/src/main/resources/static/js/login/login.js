@@ -30,8 +30,9 @@ async function realizarLogin(email, senha) {
         if (response.ok) {
             const data = await response.json();
             
-            // Armazena o token. No seu AuthController, o campo se chama 'token' dentro do LoginResponseDTO.
+            // Armazena no localStorage (para o query.js) e no Cookie (para o Spring Security bloquear páginas)
             localStorage.setItem('jwt_token', data.token);
+            document.cookie = `jwt_token=${data.token}; path=/; SameSite=Strict`;
             
             console.log('Login realizado com sucesso!');
             // Redireciona para a página home após o sucesso

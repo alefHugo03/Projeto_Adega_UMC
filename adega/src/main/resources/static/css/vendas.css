@@ -1,0 +1,54 @@
+/* Estilos específicos para a página de Vendas */
+
+/* --- Estilos do Modal (Popup) --- */
+.modal-overlay {
+    position: absolute; /* Muda de fixo (tela toda) para absoluto (dentro do main-content) */
+    top: 0;
+    left: 0;
+    width: 100%;    /* Ocupa toda a largura do main-content */
+    min-height: 100%; /* Garante cobertura mesmo se o conteúdo for maior que a tela */
+    background: rgba(0, 0, 0, 0.6); /* Fundo escurecido */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: slideDown 0.3s ease-out;
+}
+
+.btn-close-modal {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.itens-venda-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.item-venda-card {
+    background: #252525;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.item-venda-card p {
+    margin-bottom: 0.5rem;
+}

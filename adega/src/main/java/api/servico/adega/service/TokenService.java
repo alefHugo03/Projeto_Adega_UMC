@@ -11,4 +11,6 @@ public interface TokenService {
 
    String validarToken(String token);
 
+   String getSubject(String tokenJWT);
+
 }

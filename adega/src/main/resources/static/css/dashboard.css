@@ -1,0 +1,178 @@
+/* Estilos específicos para o layout do Dashboard (Home, Produtos, Estoque) */
+
+.dashboard-body {
+    margin: 0;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+.layout-wrapper {
+    display: flex;
+    min-height: 100vh; /* Garante que o wrapper ocupe a altura total da tela */
+}
+
+/* --- Sidebar (Barra Lateral) --- */
+.sidebar {
+    width: 250px;
+    background-color: #111111; /* Preto para a Sidebar */
+    color: var(--white);
+    padding: 1.5rem 0;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0; /* Impede que a sidebar encolha */
+}
+
+.sidebar-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 0 1.5rem;
+}
+
+.sidebar-header h2 {
+    color: var(--white);
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+.sidebar-nav {
+    flex-grow: 1; /* Faz a navegação ocupar o espaço restante */
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-nav a {
+    color: var(--white);
+    text-decoration: none;
+    padding: 0.8rem 1.5rem;
+    display: block;
+    transition: background-color 0.2s, padding-left 0.2s;
+    border-left: 4px solid transparent; /* Para o indicador de ativo */
+}
+
+.sidebar-nav a:hover {
+    background-color: rgba(212, 175, 55, 0.1); /* Brilho dourado sutil no hover */
+    color: var(--primary-color);
+    padding-left: 1.8rem;
+}
+
+.sidebar-nav a.active {
+    background-color: var(--primary-color);
+    color: #000; /* Texto preto no fundo dourado */
+    border-left-color: var(--white);
+    font-weight: bold;
+}
+
+.btn-logout-sidebar {
+    background-color: var(--danger-color);
+    color: var(--white);
+    border: none;
+    padding: 0.8rem 1.5rem;
+    margin-top: auto; /* Empurra o botão para o final da sidebar */
+    cursor: pointer;
+    transition: background-color 0.2s;
+    text-align: left;
+    width: 100%;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.btn-logout-sidebar:hover {
+    background-color: var(--danger-hover);
+}
+
+/* --- Main Content (Conteúdo Principal) --- */
+.main-content {
+    flex-grow: 1; /* Ocupa o restante do espaço horizontal */
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    position: relative; /* Define este container como referência para elementos absolutos internos */
+    min-width: 0; /* Essencial: permite que o conteúdo flexível encolha sem quebrar o layout */
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.header-info h1 {
+    margin: 0;
+    font-size: 2rem;
+}
+
+.header-info p {
+    margin: 0.5rem 0 0;
+    color: var(--text-muted);
+}
+
+.table-card {
+    flex-grow: 1; /* Faz o card da tabela ocupar o espaço restante */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Responsividade para o Dashboard */
+@media (max-width: 992px) {
+    .sidebar {
+        width: 200px;
+    }
+    .sidebar-header h2 {
+        font-size: 1.5rem;
+    }
+    .main-content {
+        padding: 1.5rem;
+    }
+    .content-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .layout-wrapper {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        height: auto;
+        padding: 1rem 0;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        flex-direction: row; /* Sidebar horizontal em telas pequenas */
+        justify-content: space-around;
+        align-items: center;
+    }
+    .sidebar-header {
+        margin-bottom: 0;
+    }
+    .sidebar-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    .sidebar-nav a {
+        padding: 0.5rem 1rem;
+        border-left: none;
+        border-bottom: 2px solid transparent;
+    }
+    .sidebar-nav a.active {
+        border-left: none;
+        border-bottom-color: var(--white);
+    }
+    .btn-logout-sidebar {
+        margin-top: 0;
+        width: auto;
+        padding: 0.5rem 1rem;
+    }
+    .main-content {
+        padding: 1rem;
+    }
+}

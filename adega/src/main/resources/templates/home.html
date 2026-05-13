@@ -1,37 +1,57 @@
 <!DOCTYPE html>
-<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home - Adega UMC</title>
+    <title>Dashboard - Adega UMC</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
-    <script>
-        // Guarda de Segurança
-        if (!localStorage.getItem('jwt_token')) {
-            window.location.href = '/login';
-        }
-    </script>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+    <!-- Importação do Chart.js via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
-    <div class="container">
-        <header>
-            <h1>Painel da Adega</h1>
-            <div class="header-actions">
-                <button onclick="window.logout()" class="btn btn-danger">Sair</button>
+<body class="dashboard-body">
+    <div class="layout-wrapper">
+        <!-- Barra Lateral de Navegação -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Adega UMC</h2>
             </div>
-        </header>
-        
-        <main class="content">
-            <div class="card card-sm">
-                <h2>Bem-vindo!</h2>
-                <p>O que você deseja fazer hoje?</p>
-                <div class="actions">
-                    <a href="/produtos" class="btn btn-primary">Ver Produtos</a>
+            <nav class="sidebar-nav">
+                <a th:href="@{/home}" class="active">Dashboard</a>
+                <a th:href="@{/produtos}">Produtos</a>
+                <a th:href="@{/estoque}">Estoque</a>
+                <a th:href="@{/vendas}" >Vendas</a>
+                <button class="btn-logout-sidebar" onclick="window.logout()">Sair</button>
+            </nav>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-info">
+                    <h1>Bem-vindo ao Dashboard!</h1>
+                    <p>Visão geral do seu sistema de adega.</p>
                 </div>
+            </header>
+
+            <div class="dashboard-grid">
+                <section class="card chart-card">
+                    <h3>Níveis de Estoque</h3>
+                    <div class="chart-container">
+                        <canvas id="estoqueChart"></canvas>
+                    </div>
+                </section>
+
+                <section class="card chart-card">
+                    <h3>Distribuição por Categoria</h3>
+                    <div class="chart-container">
+                        <canvas id="categoriaChart"></canvas>
+                    </div>
+                </section>
             </div>
         </main>
     </div>
-
     <script type="module" th:src="@{/js/home/home.js}"></script>
 </body>
 </html>

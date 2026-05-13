@@ -1,0 +1,42 @@
+import requisitarDados from '../conection/query.js';
+
+export async function carregarHistoricoVendas() {
+    try {
+        const vendas = await requisitarDados('/api/vendas', 'GET');
+        const tbody = document.getElementById('tabela-vendas-body');
+        if (!tbody) return;
+        
+        tbody.innerHTML = '';
+
+        if (vendas && vendas.length > 0) {
+            const moneyFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+
+            vendas.forEach(venda => {
+                const idVenda = venda.idVenda || venda.id;
+                
+                // Formata a data para algo mais amigável: DD/MM/AAAA HH:mm
+                const dataFormatada = venda.dataVenda 
+                    ? new Date(venda.dataVenda).toLocaleString('pt-BR') 
+                    : 'N/A';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>#${idVenda || '---'}</td>
+                    <td>${dataFormatada}</td>
+                    <td>${venda.formaPagamento}</td>
+                    <td class="text-right">${moneyFormatter.format(venda.valorTotal || 0)}</td>
+                    <td>
+                        <button class="btn btn-info btn-table-action" onclick="window.verDetalhesVenda('${idVenda}')">Itens</button>
+                        <button class="btn btn-warning btn-table-action" onclick="window.prepararEdicaoVenda('${idVenda}')">Editar</button>
+                        <button class="btn btn-danger btn-table-action" onclick="window.excluirVenda('${idVenda}')">Excluir</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } else {
+            tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Nenhuma venda encontrada.</td></tr>';
+        }
+    } catch (error) {
+        console.error('Erro ao carregar vendas:', error);
+    }
+}

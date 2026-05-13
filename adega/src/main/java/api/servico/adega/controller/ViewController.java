@@ -26,4 +26,14 @@ public class ViewController {
     public String produtos() {
         return "produtos"; // Procura por src/main/resources/templates/produtos.html
     }
+
+    @GetMapping("/estoque")
+    public String estoque() {
+        return "estoque"; // Procura por src/main/resources/templates/estoque.html
+    }
+
+    @GetMapping("/vendas")
+    public String vendas() {
+        return "vendas"; // Procura por src/main/resources/templates/vendas.html
+    }
 }

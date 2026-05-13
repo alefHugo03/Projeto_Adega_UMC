@@ -1,12 +1,6 @@
 package api.servico.adega.service.impl;
 
-import api.servico.adega.dto.requests.UsuarioRequestDTO;
-import api.servico.adega.dto.responses.UsuarioResponseDTO;
-import api.servico.adega.exception.ConflictException;
-import api.servico.adega.exception.ResourceNotFoundException;
-import api.servico.adega.model.Usuario;
-import api.servico.adega.repository.UsuarioRepository;
-import api.servico.adega.service.UsuarioService;
+import java.util.List;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,7 +9,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import api.servico.adega.dto.requests.UsuarioRequestDTO;
+import api.servico.adega.dto.responses.UsuarioResponseDTO;
+import api.servico.adega.exception.ConflictException;
+import api.servico.adega.exception.ResourceNotFoundException;
+import api.servico.adega.model.Usuario;
+import api.servico.adega.repository.UsuarioRepository;
+import api.servico.adega.service.UsuarioService;
 
 /**
  * Implementação do service de usuário.
@@ -157,6 +157,7 @@ public class UsuarioServiceImpl implements UsuarioService, UserDetailsService {
         Usuario usuario = new Usuario();
         usuario.setNome(dto.getNome());
         usuario.setEmail(dto.getEmail());
+        usuario.setActive(true); // Garante que o usuário comece ativo para permitir o login
         return usuario;
     }
 }
