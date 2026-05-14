@@ -30,7 +30,8 @@ public class SecurityConfigurations {
                     // Permite acesso ao login e recursos estáticos (CSS, JS)
                     req.requestMatchers(HttpMethod.POST, "/auth/login").permitAll();
                     req.requestMatchers(HttpMethod.GET, "/login", "/css/**", "/js/**", "/img/**").permitAll();
-                    
+                    req.requestMatchers(HttpMethod.DELETE, "/api/**").authenticated();
+
                     // Exemplo: Permitir criação de usuário se necessário (cadastro público)
                     // req.requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll();
                     

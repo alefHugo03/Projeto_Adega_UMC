@@ -16,13 +16,15 @@ public class VendaResponseDTO {
     private String formaPagamento;
     private LocalDateTime dataVenda;
     private BigDecimal valorTotal;
+    private boolean active;
     private UsuarioResponseDTO user;
 
-    public VendaResponseDTO(Long idVenda, String formaPagamento, LocalDateTime dataVenda, BigDecimal valorTotal, UsuarioResponseDTO user) {
+    public VendaResponseDTO(Long idVenda, String formaPagamento, LocalDateTime dataVenda, BigDecimal valorTotal, boolean active, UsuarioResponseDTO user) {
         this.idVenda = idVenda;
         this.formaPagamento = formaPagamento;
         this.dataVenda = dataVenda;
         this.valorTotal = valorTotal;
+        this.active = active;
         this.user = user;
     }
 }

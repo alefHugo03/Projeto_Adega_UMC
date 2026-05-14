@@ -1,6 +1,6 @@
 import requisitarDados from '../conection/query.js';
 
-export async function carregarEstoque() {
+async function carregarEstoque() {
     try {
         const estoques = await requisitarDados('/api/estoques', 'GET');
         const tbody = document.getElementById('tabela-estoque-body');
@@ -40,3 +40,5 @@ export async function carregarEstoque() {
         if (tbody) tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Erro ao carregar dados do estoque.</td></tr>';
     }
 }
+
+export default carregarEstoque;

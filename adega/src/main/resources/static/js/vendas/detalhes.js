@@ -11,12 +11,20 @@ export async function verDetalhesVenda(vendaId) {
         if (listaItens) {
             listaItens.innerHTML = '';
             if (itens && itens.length > 0) {
+                const moneyFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+
                 itens.forEach(item => {
+                    const valorUnitario = item.produto?.valorUnitario || 0;
+                    const qtd = item.quantidadeVendida || item.quantidade || 0;
+                    const subtotal = valorUnitario * qtd;
+
                     const div = document.createElement('div');
                     div.className = 'item-venda-card';
                     div.innerHTML = `
                         <p><strong>Produto:</strong> ${item.produto?.nomeProduto || item.nomeProduto || 'N/A'}</p>
-                        <p><strong>Qtd:</strong> ${item.quantidadeVendida || item.quantidade || 0} unid.</p>
+                        <p><strong>Preço Unit.:</strong> ${moneyFormatter.format(valorUnitario)}</p>
+                        <p><strong>Quantidade:</strong> ${qtd} unid.</p>
+                        <p><strong>Subtotal:</strong> ${moneyFormatter.format(subtotal)}</p>
                     `;
                     listaItens.appendChild(div);
                 });

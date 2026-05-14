@@ -97,6 +97,10 @@ body {
 h1, h2, h3, h4, h5, h6 { color: var(--primary-color); margin-bottom: 0.5rem; line-height: 1.2; }
 p { color: var(--text-muted); margin-bottom: 2rem; }
 
+.header-info p {
+    margin-bottom: 0;
+}
+
 /* --- Botões (Refatorados para serem mais flexíveis) --- */
 .btn {
     padding: 0.7rem 1.2rem;
@@ -290,8 +294,85 @@ tr:hover {
     color: var(--text-color);
 }
 
+.itens-venda-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
 .item-venda-card strong {
     color: var(--primary-color); /* Deixa os rótulos em Dourado */
+}
+
+/* --- Resumo de Valores no Modal --- */
+.resumo-valores {
+    background: #252525;
+    border-radius: 8px;
+    border: 1px solid #444;
+}
+
+.modal-subheader {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.total-venda-destaque {
+    color: #00d1b2;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.total-pago-status {
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.status-match { color: #28a745; } /* Verde se coincidir */
+.status-mismatch { color: var(--danger-color); } /* Vermelho se houver diferença */
+
+/* --- Linhas de Pagamento Dinâmicas --- */
+.linha-pagamento {
+    background: #202020;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    transition: border-color 0.2s;
+}
+
+.linha-pagamento:hover {
+    border-color: #555;
+}
+
+.linha-pagamento select, .linha-pagamento input {
+    padding: 0.6rem !important;
+    font-size: 0.95rem !important;
+    background-color: #252525 !important;
+    border: 1px solid #444 !important;
+    color: var(--white) !important;
+    border-radius: 6px !important;
+}
+
+.linha-pagamento .btn-danger {
+    padding: 0.4rem 0.7rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.linha-pagamento select:focus, .linha-pagamento input:focus {
+    border-color: var(--primary-color) !important;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+}
+
+.btn-close-modal {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
 }
 
 /* --- Modais --- */
@@ -304,11 +385,20 @@ tr:hover {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(8px);
     justify-content: center;
     align-items: center;
     padding: 20px;
 }
+
+.modal-content {
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    border: 1px solid var(--border-color);
+}
+
 .modal[style*="display: flex"] {
     display: flex !important;
 }
@@ -332,6 +422,12 @@ a:hover {
 .mt-1 { margin-top: 0.5rem; }
 .mt-2 { margin-top: 1rem; }
 .mt-3 { margin-top: 1.5rem; }
+
+hr {
+    border: 0;
+    border-top: 1px solid var(--border-color);
+    margin: 1.5rem 0;
+}
 
 /* Flexbox utilities */
 .d-flex { display: flex; }

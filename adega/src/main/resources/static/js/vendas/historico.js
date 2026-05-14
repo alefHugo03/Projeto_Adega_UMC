@@ -19,12 +19,22 @@ export async function carregarHistoricoVendas() {
                     ? new Date(venda.dataVenda).toLocaleString('pt-BR') 
                     : 'N/A';
 
+                // Define o visual do status baseado no campo isActive (venda.active)
+                const statusBadge = venda.active 
+                    ? '<span class="badge status-ok">Realizada</span>' 
+                    : '<span class="badge status-danger">Cancelada</span>';
+                
+                const infoPagamento = venda.quantidadeParcelas > 1 
+                    ? `${venda.formaPagamento} (${venda.quantidadeParcelas}x)` 
+                    : venda.formaPagamento;
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>#${idVenda || '---'}</td>
                     <td>${dataFormatada}</td>
-                    <td>${venda.formaPagamento}</td>
+                    <td>${infoPagamento}</td>
                     <td class="text-right">${moneyFormatter.format(venda.valorTotal || 0)}</td>
+                    <td>${statusBadge}</td>
                     <td>
                         <button class="btn btn-info btn-table-action" onclick="window.verDetalhesVenda('${idVenda}')">Itens</button>
                         <button class="btn btn-warning btn-table-action" onclick="window.prepararEdicaoVenda('${idVenda}')">Editar</button>

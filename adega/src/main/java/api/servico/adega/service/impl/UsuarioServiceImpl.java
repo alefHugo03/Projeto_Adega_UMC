@@ -54,6 +54,7 @@ public class UsuarioServiceImpl implements UsuarioService, UserDetailsService {
     public List<UsuarioResponseDTO> listarTodos() {
         return usuarioRepository.findAll()
                 .stream()
+                .filter(Usuario::isActive)
                 .map(this::toResponseDTO)
                 .toList();
     }
@@ -65,6 +66,9 @@ public class UsuarioServiceImpl implements UsuarioService, UserDetailsService {
     public UsuarioResponseDTO buscarPorId(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
+        if (!usuario.isActive()) {
+            throw new ResourceNotFoundException("Usuario", "id", id);
+        }
         return toResponseDTO(usuario);
     }
 
@@ -95,6 +99,11 @@ public class UsuarioServiceImpl implements UsuarioService, UserDetailsService {
         Usuario usuarioExistente = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
 
+        // Impede a edição de um usuário desativado
+        if (!usuarioExistente.isActive()) {
+            throw new ResourceNotFoundException("Usuario", "id", id);
+        }
+
         // Verifica se o e-mail mudou e se o novo já existe para outro usuário
         if (!usuarioExistente.getEmail().equals(usuarioRequestDTO.getEmail()) &&
                 usuarioRepository.existsByEmail(usuarioRequestDTO.getEmail())) {
@@ -108,14 +117,16 @@ public class UsuarioServiceImpl implements UsuarioService, UserDetailsService {
     }
 
     /**
-     * Exclui um usuário existente. Se o usuário não for encontrado, lança exceção.
+     * Desativa um usuário existente (Soft Delete).
      */
     @Override
     @Transactional
     public void excluirUsuario(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
-        usuarioRepository.delete(usuario);
+        
+        usuario.setActive(false);
+        usuarioRepository.save(usuario);
     }
 
     /**
@@ -125,6 +136,7 @@ public class UsuarioServiceImpl implements UsuarioService, UserDetailsService {
     public List<UsuarioResponseDTO> buscarPorNome(String nome) {
         return usuarioRepository.findByNomeContainingIgnoreCase(nome)
                 .stream()
+                .filter(Usuario::isActive)
                 .map(this::toResponseDTO)
                 .toList();
     }
@@ -135,6 +147,7 @@ public class UsuarioServiceImpl implements UsuarioService, UserDetailsService {
     @Override
     public UsuarioResponseDTO buscarPorEmail(String email) {
         Usuario usuario = usuarioRepository.findByEmail(email)
+                .filter(Usuario::isActive)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "email", email));
         return toResponseDTO(usuario);
     }

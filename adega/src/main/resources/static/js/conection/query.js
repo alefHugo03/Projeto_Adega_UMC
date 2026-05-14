@@ -1,7 +1,6 @@
 
 
 async function requisitarDados(caminho, metodo, corpo = null) {
-    // 1. Recupera o token do localStorage
     const token = localStorage.getItem('jwt_token');
 
     if (!token) {
@@ -14,7 +13,6 @@ async function requisitarDados(caminho, metodo, corpo = null) {
         const response = await fetch(caminho, {
             method: metodo,
             headers: {
-                // 2. Adiciona o token no formato que o seu SecurityFilter espera
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
@@ -29,8 +27,18 @@ async function requisitarDados(caminho, metodo, corpo = null) {
                 window.location.href = '/auth/logout';
             }
 
-            // Se o token existe mas é inválido/expirado, o 401/403 virá do backend.
-            throw new Error(`Erro na requisição: ${response.status} ${response.statusText}`);
+            // Tenta capturar a mensagem de erro detalhada do GlobalExceptionHandler
+            let mensagemErro = `Erro na requisição: ${response.status}`;
+            try {
+                const corpoErro = await response.json();
+                if (corpoErro && corpoErro.message) {
+                    mensagemErro = corpoErro.message;
+                }
+            } catch (e) {
+                mensagemErro += ` ${response.statusText}`;
+            }
+
+            throw new Error(mensagemErro);
         }
 
         // Verifica se há conteúdo na resposta antes de tentar converter para JSON

@@ -22,6 +22,8 @@ public class VendaRequestDTO {
     @NotEmpty(message = "A venda deve conter ao menos um item")
     private List<ItemVendaRequestDTO> itens;
 
+    private List<PagamentoRequestDTO> pagamentos;
+
     @Getter
     @Setter
     public static class ItemVendaRequestDTO {

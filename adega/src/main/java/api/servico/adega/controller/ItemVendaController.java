@@ -26,14 +26,14 @@ import jakarta.validation.Valid;
  */
 @RestController
 @RequestMapping("/api/itemvendas")
-public class ItemProdutoController {
+public class ItemVendaController {
 
     private final ItemVendaService itemVendaService;
 
     /**
      * Injeção do service que encapsula a lógica de negócios.
      */
-    public ItemProdutoController(ItemVendaService itemVendaService) {
+    public ItemVendaController(ItemVendaService itemVendaService) {
         this.itemVendaService = itemVendaService;
     }
 
@@ -41,7 +41,7 @@ public class ItemProdutoController {
      * Busca itens de venda pelo ID do item.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<List<ItemVendaResponseDTO>> buscarPorIdItemVenda(@PathVariable Long id) {
+    public ResponseEntity<ItemVendaResponseDTO> buscarPorIdItemVenda(@PathVariable Long id) {
         return ResponseEntity.ok(itemVendaService.buscarPorIdItemVenda(id));
     }
 
@@ -93,6 +93,12 @@ public class ItemProdutoController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluirVenda(@PathVariable Long id) {
         itemVendaService.excluirVenda(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/venda/{id}")
+    public ResponseEntity<Void> excluirVendaPorIdVenda(@PathVariable Long id) {
+        itemVendaService.excluirPorIdVenda(id);
         return ResponseEntity.noContent().build();
     }
 }

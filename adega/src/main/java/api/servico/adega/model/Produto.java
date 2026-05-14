@@ -33,4 +33,6 @@ public class Produto {
     @Column(name = "valor_unitario")
     private BigDecimal valorUnitario;
 
+    @Column(name = "is_active")
+    private boolean isActive = true;
 }

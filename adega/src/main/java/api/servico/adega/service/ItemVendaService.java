@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ItemVendaService {
 
-    List<ItemVendaResponseDTO> buscarPorIdItemVenda(Long id);
+    ItemVendaResponseDTO buscarPorIdItemVenda(Long id);
 
     List<ItemVendaResponseDTO> buscarPorIdVenda(Long id);
 
@@ -20,4 +20,6 @@ public interface ItemVendaService {
     ItemVendaResponseDTO editarVenda(Long id, ItemVendaResponseDTO itemVendaResponseDTO);
 
     void excluirVenda(Long id);
+
+    void excluirPorIdVenda(Long vendaId);
 }

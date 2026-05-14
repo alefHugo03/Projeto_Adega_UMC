@@ -3,56 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Estoque - Adega UMC</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}"> <!-- Estilos gerais -->
-    <link rel="stylesheet" th:href="@{/css/dashboard.css}"> <!-- Estilos de layout do dashboard -->
-    <link rel="stylesheet" th:href="@{/css/estoque.css}"> <!-- Estilos específicos da página de estoque -->
+    <title>Estoque - Adega UMC</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
 </head>
 <body class="dashboard-body">
     <div class="layout-wrapper">
-        <!-- Barra Lateral de Navegação -->
         <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2>Adega UMC</h2>
-            </div>
+            <div class="sidebar-header"><h2>Adega UMC</h2></div>
             <nav class="sidebar-nav">
                 <a th:href="@{/home}">Dashboard</a>
                 <a th:href="@{/produtos}">Produtos</a>
                 <a th:href="@{/estoque}" class="active">Estoque</a>
-                <a th:href="@{/vendas}" >Vender</a>
-                <button class="btn-logout-sidebar" onclick="window.logout()">Sair</button>
+                <a th:href="@{/vendas}">Vendas</a>
+                <button class="btn-logout-sidebar" onclick="logout()">Sair</button>
             </nav>
         </aside>
 
-        <!-- Conteúdo Principal -->
         <main class="main-content">
             <header class="content-header">
                 <div class="header-info">
-                    <h1>Gerenciamento de Estoque</h1>
-                    <p>Monitore e ajuste a disponibilidade dos seus produtos.</p>
+                    <h1>Controle de Estoque</h1>
+                    <p>Monitore e reponha o nível de mercadorias.</p>
                 </div>
-                <button class="btn btn-primary" onclick="window.prepararEntrada()">+ Nova Entrada</button>
             </header>
 
             <section class="card table-card">
+                <h3>Níveis de Estoque</h3>
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
                                 <th>Produto</th>
+                                <th>Categoria</th>
                                 <th>Quantidade</th>
                                 <th>Status</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="tabela-estoque-body">
-                            <!-- Conteúdo carregado dinamicamente via JS -->
-                        </tbody>
+                        <tbody id="tabela-estoque-body"></tbody>
                     </table>
                 </div>
             </section>
         </main>
     </div>
+
+    <!-- Modal de Reposição -->
+    <div id="modal-estoque" class="modal">
+        <div class="card modal-content">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 id="modal-estoque-titulo">Repor Estoque</h2>
+                <button class="btn-close-modal" onclick="fecharModal('modal-estoque')">&times;</button>
+            </div>
+            <form id="form-estoque" onsubmit="salvarEstoque(event)">
+                <input type="hidden" id="estoque-id">
+                <input type="hidden" id="estoque-produto-id">
+
+                <div class="form-group mb-3">
+                    <label>Produto:</label>
+                    <input type="text" id="estoque-produto-nome" readonly style="opacity: 0.7; cursor: not-allowed;">
+                </div>
+
+                <div class="form-group mb-4">
+                    <label for="estoque-quantidade">Nova Quantidade Total:</label>
+                    <input type="number" id="estoque-quantidade" min="0" required>
+                    <small style="color: var(--text-muted);">Informe a quantidade total após a contagem/reposição.</small>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-danger" onclick="fecharModal('modal-estoque')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Atualizar Estoque</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script type="module" th:src="@{/js/estoque/estoque.js}"></script>
 </body>
 </html>

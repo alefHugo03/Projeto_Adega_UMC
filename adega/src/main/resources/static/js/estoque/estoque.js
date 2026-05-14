@@ -1,10 +1,15 @@
-import logout from '../conection/logout.js'; 
-import { carregarEstoque } from './listagem.js';
-import { prepararEntrada, prepararEdicao, excluirEstoque } from './acoes.js';
+import logout from '../conection/logout.js';
+import { carregarEstoque, prepararReposicao, salvarEstoque } from './acoes.js';
+import { fecharModal, fecharAoClicarFora } from '../modules/modal.js';
 
+// Global exposure
 window.logout = logout;
-window.prepararEntrada = prepararEntrada;
-window.prepararEdicao = prepararEdicao;
-window.excluirEstoque = excluirEstoque;
+window.prepararReposicao = prepararReposicao;
+window.salvarEstoque = salvarEstoque;
+window.fecharModal = fecharModal;
 
-document.addEventListener('DOMContentLoaded', carregarEstoque);
+window.addEventListener('click', fecharAoClicarFora);
+
+document.addEventListener('DOMContentLoaded', () => {
+    carregarEstoque();
+});

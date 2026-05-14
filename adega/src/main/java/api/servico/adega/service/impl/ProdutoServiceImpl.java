@@ -7,7 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 import api.servico.adega.dto.requests.ProdutoRequestDTO;
 import api.servico.adega.dto.responses.ProdutoResponseDTO;
 import api.servico.adega.exception.ResourceNotFoundException;
+import api.servico.adega.model.Estoque;
 import api.servico.adega.model.Produto;
+import api.servico.adega.repository.EstoqueRepository;
 import api.servico.adega.repository.ProdutoRepository;
 
 import java.math.BigDecimal;
@@ -19,15 +21,18 @@ import java.util.Optional;
 public class ProdutoServiceImpl implements ProdutoService {
 
     private final ProdutoRepository produtoRepository;
+    private final EstoqueRepository estoqueRepository;
 
-    public ProdutoServiceImpl(ProdutoRepository produtoRepository) {
+    public ProdutoServiceImpl(ProdutoRepository produtoRepository, EstoqueRepository estoqueRepository) {
         this.produtoRepository = produtoRepository;
+        this.estoqueRepository = estoqueRepository;
     }
 
     @Override
     public List<ProdutoResponseDTO> listarProdutos() {
         return produtoRepository.findAll()
                 .stream()
+                .filter(Produto::isActive)
                 .map(this::toResponseDTO)
                 .toList();
     }
@@ -36,6 +41,9 @@ public class ProdutoServiceImpl implements ProdutoService {
     public ProdutoResponseDTO buscarPorId(Long id) {
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("produto", "id", id));
+        if (!produto.isActive()) {
+            throw new ResourceNotFoundException("produto", "id", id);
+        }
         return toResponseDTO(produto);
     }
 
@@ -48,6 +56,7 @@ public class ProdutoServiceImpl implements ProdutoService {
         }
 
         return produto.stream()
+                .filter(Produto::isActive)
                 .map(this::toResponseDTO)
                 .toList();
     }
@@ -61,6 +70,7 @@ public class ProdutoServiceImpl implements ProdutoService {
         }
 
         return List.of(produto.get()).stream()
+                .filter(Produto::isActive)
                 .map(this::toResponseDTO)
                 .toList();
     }
@@ -74,6 +84,7 @@ public class ProdutoServiceImpl implements ProdutoService {
         }
 
         return produto.stream()
+                .filter(Produto::isActive)
                 .map(this::toResponseDTO)
                 .toList();
     }
@@ -83,8 +94,15 @@ public class ProdutoServiceImpl implements ProdutoService {
     public ProdutoResponseDTO criarProduto(ProdutoRequestDTO produtoRequestDTO) {
         Produto produto = toEntity(produtoRequestDTO);
         Produto salvo = produtoRepository.save(produto);
-        return toResponseDTO(salvo);
 
+        // Inicializa o estoque automaticamente para evitar erros na primeira venda
+        Estoque estoqueInicial = new Estoque();
+        estoqueInicial.setProduto(salvo);
+        estoqueInicial.setQuantidade(0);
+        estoqueInicial.setActive(true);
+        estoqueRepository.save(estoqueInicial);
+
+        return toResponseDTO(salvo);
     }
 
     @Override
@@ -92,6 +110,12 @@ public class ProdutoServiceImpl implements ProdutoService {
     public ProdutoResponseDTO atualizarProduto(Long id, ProdutoRequestDTO produtoRequestDTO) {
         Produto produtoExiste = produtoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("produto", "id", id));
+
+        // Impede a edição de um produto desativado
+        if (!produtoExiste.isActive()) {
+            throw new ResourceNotFoundException("produto", "id", id);
+        }
+
         produtoExiste.setTipoProduto(produtoRequestDTO.getTipoProduto());
         produtoExiste.setNomeProduto(produtoRequestDTO.getNomeProduto());
         // Removido o .toString() pois o campo na entidade agora é BigDecimal
@@ -107,7 +131,8 @@ public class ProdutoServiceImpl implements ProdutoService {
     public void excluirProduto(Long id) {
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("produto", "id", id));
-        produtoRepository.delete(produto);
+        produto.setActive(false);
+        produtoRepository.save(produto);
     }
 
 
@@ -127,6 +152,7 @@ public class ProdutoServiceImpl implements ProdutoService {
         produto.setNomeProduto(dto.getNomeProduto());
         // Removido o .toString() para salvar como BigDecimal
         produto.setValorUnitario(new BigDecimal(dto.getValorUnitario()));
+        produto.setActive(true); // Garante que nasce ativo
 
         return produto;
     }

@@ -1,5 +1,6 @@
 package api.servico.adega.repository;
 
+import api.servico.adega.enums.FormaPagamento;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -25,5 +26,5 @@ public interface VendaRepository extends JpaRepository<Venda, Long>{
 
     List<Venda> findByUser_Id(Long idUsuario);
 
-    List<Venda> findByFormaPagamento(String formaPagamento);
+    List<Venda> findDistinctByPagamentos_FormaPagamento(FormaPagamento formaPagamento);
 }
