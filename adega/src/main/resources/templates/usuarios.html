@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuários - Adego Systems</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+<body class="dashboard-body">
+    <div class="layout-wrapper">
+        <!-- Sidebar injetada via JS -->
+        <div id="sidebar-container"></div>
+        
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-info"><h1>Gestão de Acessos</h1><p>Adicione novos vendedores ou administradores.</p></div>
+                <button class="btn btn-primary" id="btn-novo-usuario" style="display: none;" onclick="window.prepararCriacaoUsuario()">+ Novo Usuário</button>
+            </header>
+            <section class="card table-card">
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th>Ações</th></tr></thead>
+                        <tbody id="tabela-usuarios-body"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+    <div id="modal-usuario" class="modal">
+        <div class="card modal-content">
+            <h2 id="modal-usuario-titulo">Novo Usuário</h2>
+            <form id="form-usuario" onsubmit="window.salvarUsuario(event)">
+                <input type="hidden" id="usuario-id">
+                <div class="form-group mb-2"><label>Nome:</label><input type="text" id="usuario-nome" required></div>
+                <div class="form-group mb-2"><label>E-mail:</label><input type="email" id="usuario-email" required></div>
+                <div class="form-group mb-2"><label>Senha:</label><input type="password" id="usuario-senha" required></div>
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-danger" onclick="fecharModal('modal-usuario')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script type="module">
+        import { fecharModal, fecharAoClicarFora } from '../js/modules/modal.js';
+        import logout from '../js/conection/logout.js';
+        import { isAdmin, carregarUsuarios, prepararCriacaoUsuario, salvarUsuario, desativarUsuario } from '../js/usuario/acoes.js';
+        import { loadSidebar } from '../js/modules/sidebar.js';
+
+        // Exposição para o HTML (onclick/onsubmit)
+        window.logout = logout;
+        window.fecharModal = fecharModal;
+        window.prepararCriacaoUsuario = prepararCriacaoUsuario;
+        window.salvarUsuario = salvarUsuario;
+        window.desativarUsuario = desativarUsuario;
+
+        window.addEventListener('click', fecharAoClicarFora);
+        
+        // Carrega a sidebar e ajusta a visibilidade do menu de usuários
+        document.addEventListener('DOMContentLoaded', loadSidebar);
+
+        // Controle de acesso e visibilidade de elementos administrativos
+        if (isAdmin()) {
+            document.addEventListener('DOMContentLoaded', () => {
+                const btnNovo = document.getElementById('btn-novo-usuario');
+                if (btnNovo) btnNovo.style.display = 'block';
+            });
+        } else {
+            // Se não for admin, redireciona pois a página é restrita
+            window.location.href = '/home';
+        }
+
+        document.addEventListener('DOMContentLoaded', carregarUsuarios);
+    </script>
+</body></html>

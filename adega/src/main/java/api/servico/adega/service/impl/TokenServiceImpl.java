@@ -28,6 +28,8 @@ public class TokenServiceImpl implements TokenService {
             return JWT.create()
                     .withIssuer("Minha_API")
                     .withSubject(usuario.getEmail())
+                    .withClaim("id", usuario.getId()) // Adiciona o ID para identificação automática nas vendas
+                    .withClaim("role", usuario.getRole()) // Adiciona a role no payload do JWT
                     .withExpiresAt(dataExpiracao())
                     .sign(algoritmo);
         } catch (JWTCreationException exception){

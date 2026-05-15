@@ -36,4 +36,8 @@ public class ViewController {
     public String vendas() {
         return "vendas"; // Procura por src/main/resources/templates/vendas.html
     }
+    @GetMapping("/usuarios")
+    public String usuarios() {
+        return "usuarios"; // Procura por src/main/resources/templates/vendas.html
+    }
 }

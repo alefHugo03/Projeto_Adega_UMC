@@ -1,7 +1,7 @@
 package api.servico.adega.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -41,9 +41,9 @@ public class VendaController {
     /**
      * Lista todas as vendas.
      */
-    @GetMapping
-    public ResponseEntity<List<VendaResponseDTO>> listarVendas() {
-        return ResponseEntity.ok(vendaService.listarVenda());
+    @GetMapping // Endpoint principal para listar todas as vendas com paginação
+    public ResponseEntity<Page<VendaResponseDTO>> listarVendasPaginadas(Pageable pageable) {
+        return ResponseEntity.ok(vendaService.listarVendasPaginadas(pageable));
     }
 
     /**
@@ -57,25 +57,25 @@ public class VendaController {
     /**
      * Busca vendas por data.
      */
-    @GetMapping("/data/{data}")
-    public ResponseEntity<List<VendaResponseDTO>> buscarPorData(@PathVariable String data) {
-        return ResponseEntity.ok(vendaService.buscarPorData(data));
+    @GetMapping("/por-data") // Alterado para usar @RequestParam para consistência com outros filtros
+    public ResponseEntity<Page<VendaResponseDTO>> buscarPorData(@RequestParam String data, Pageable pageable) {
+        return ResponseEntity.ok(vendaService.buscarPorData(data, pageable));
     }
 
     /**
      * Busca vendas por ID do usuário.
      */
-    @GetMapping("/usuario/{idUsuario}")
-    public ResponseEntity<List<VendaResponseDTO>> buscarPorIdUsuario(@PathVariable Long idUsuario) {
-        return ResponseEntity.ok(vendaService.buscarPorIdUsuario(idUsuario));
+    @GetMapping("/por-usuario") // Alterado para usar @RequestParam
+    public ResponseEntity<Page<VendaResponseDTO>> buscarPorIdUsuario(@RequestParam Long idUsuario, Pageable pageable) {
+        return ResponseEntity.ok(vendaService.buscarPorIdUsuario(idUsuario, pageable));
     }
 
     /**
      * Busca vendas por forma de pagamento.
      */
-    @GetMapping("/pagamento")
-    public ResponseEntity<List<VendaResponseDTO>> buscarPorFormaPagamento(@RequestParam String formaPagamento) {
-        return ResponseEntity.ok(vendaService.buscarPorFormaPagamento(formaPagamento));
+    @GetMapping("/por-forma-pagamento")
+    public ResponseEntity<Page<VendaResponseDTO>> buscarPorFormaPagamento(@RequestParam String formaPagamento, Pageable pageable) {
+        return ResponseEntity.ok(vendaService.buscarPorFormaPagamento(formaPagamento, pageable));
     }
 
     /**

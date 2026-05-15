@@ -7,6 +7,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * Responsável por criar os usuários iniciais do sistema.
  */
@@ -29,17 +31,32 @@ public class UsuarioDataLoader implements CommandLineRunner {
             admin.setNome("Administrador");
             admin.setEmail("admin@admin.com");
             admin.setSenha(passwordEncoder.encode("admin123"));
+            admin.setRole("ROLE_ADMIN"); // Define explicitamente como Administrador
             admin.setActive(true);
             usuarioRepository.save(admin);
 
-            Usuario vendedor = new Usuario();
-            vendedor.setNome("Vendedor Teste");
-            vendedor.setEmail("vendedor@vendedor.com");
-            vendedor.setSenha(passwordEncoder.encode("venda123"));
-            vendedor.setActive(true);
-            usuarioRepository.save(vendedor);
+            // Criando os vendedores para a competição
+            Usuario u1 = new Usuario();
+            u1.setNome("Alef");
+            u1.setEmail("alef@adego.com");
+            u1.setSenha(passwordEncoder.encode("alef123"));
+            u1.setActive(true);
 
-            System.out.println(">>> UsuarioDataLoader: Usuários admin@admin.com e vendedor@vendedor.com criados.");
+            Usuario u2 = new Usuario();
+            u2.setNome("Richard");
+            u2.setEmail("richard@adego.com");
+            u2.setSenha(passwordEncoder.encode("richard123"));
+            u2.setActive(true);
+
+            Usuario u3 = new Usuario();
+            u3.setNome("Vitor");
+            u3.setEmail("vitor@adego.com");
+            u3.setSenha(passwordEncoder.encode("vitor123"));
+            u3.setActive(true);
+
+            usuarioRepository.saveAll(List.of(u1, u2, u3));
+
+            System.out.println(">>> UsuarioDataLoader: Usuários Admin, Alef, Richard e Vitor criados.");
         }
     }
 }

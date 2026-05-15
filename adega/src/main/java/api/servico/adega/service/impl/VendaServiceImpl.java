@@ -7,6 +7,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,6 +63,12 @@ public class VendaServiceImpl implements VendaService {
     }
 
     @Override
+    public Page<VendaResponseDTO> listarVendasPaginadas(Pageable pageable) {
+        return vendaRepository.findAll(pageable)
+                .map(this::toResponseDTO);
+    }
+
+    @Override
     public VendaResponseDTO buscarPorId(Long id){
         Venda venda = vendaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("venda", "id", id));
@@ -68,32 +76,28 @@ public class VendaServiceImpl implements VendaService {
     }
 
     @Override
-    public List<VendaResponseDTO> buscarPorData(String data) {
+    public Page<VendaResponseDTO> buscarPorData(String data, Pageable pageable) {
         LocalDate dataConvertida = LocalDate.parse(data);
         LocalDateTime inicio = dataConvertida.atStartOfDay();
         LocalDateTime fim = dataConvertida.atTime(23, 59, 59, 999_999_999);
-        List<Venda> vendas = vendaRepository.findByDataVendaBetween(inicio, fim);
+        Page<Venda> vendas = vendaRepository.findByDataVendaBetween(inicio, fim, pageable);
 
         if (vendas.isEmpty()) {
             throw new ResourceNotFoundException("Venda", "data", data);
         }
 
-        return vendas.stream()
-                .map(this::toResponseDTO)
-                .toList();
+        return vendas.map(this::toResponseDTO);
     }
 
     @Override
-    public List<VendaResponseDTO> buscarPorIdUsuario(Long id){
-        List<Venda> vendas = vendaRepository.findByUser_Id(id);
-        return vendas.stream()
-                .map(this::toResponseDTO)
-                .toList();
+    public Page<VendaResponseDTO> buscarPorIdUsuario(Long id, Pageable pageable){
+        Page<Venda> vendas = vendaRepository.findByUser_Id(id, pageable);
+        return vendas.map(this::toResponseDTO);
     }
 
     
     @Override
-    public List<VendaResponseDTO> buscarPorFormaPagamento(String formaPagamento){
+    public Page<VendaResponseDTO> buscarPorFormaPagamento(String formaPagamento, Pageable pageable){
         FormaPagamento tipo;
         try {
             tipo = FormaPagamento.paraEnum(formaPagamento);
@@ -101,13 +105,13 @@ public class VendaServiceImpl implements VendaService {
             throw new BadRequestException("Forma de pagamento inválida: " + formaPagamento);
         }
 
-        List<Venda> vendas = vendaRepository.findDistinctByPagamentos_FormaPagamento(tipo);
+        Page<Venda> vendas = vendaRepository.findDistinctByPagamentos_FormaPagamento(tipo, pageable);
 
         if (vendas.isEmpty()) {
             throw new ResourceNotFoundException("Venda", "formaPagamento", formaPagamento);
         }
 
-        return vendas.stream().map(this::toResponseDTO).toList();
+        return vendas.map(this::toResponseDTO);
     }
 
     @Override
@@ -167,36 +171,7 @@ public class VendaServiceImpl implements VendaService {
         }
 
         // --- PROCESSAMENTO DE PAGAMENTOS ---
-        BigDecimal totalPago = BigDecimal.ZERO;
-        if (vendaRequestDTO.getPagamentos() != null) {
-            for (PagamentoRequestDTO pagDTO : vendaRequestDTO.getPagamentos()) {
-                FormaPagamento tipo;
-                try {
-                    tipo = FormaPagamento.paraEnum(pagDTO.getFormaPagamento());
-                } catch (IllegalArgumentException e) {
-                    throw new BadRequestException(e.getMessage());
-                }
-
-                // Validação de Parcelas (Máximo 4x para Crédito)
-                if (FormaPagamento.CARTAO_CREDITO.equals(tipo) && pagDTO.getParcelas() > 4) {
-                    throw new BadRequestException("O parcelamento no cartão de crédito é permitido em até 4x.");
-                }
-
-                PagamentoVenda pag = new PagamentoVenda();
-                pag.setVenda(venda);
-                pag.setFormaPagamento(tipo);
-                pag.setValorPago(pagDTO.getValorPago());
-                pag.setParcelas(pagDTO.getParcelas());
-                
-                pagamentoVendaRepository.save(pag);
-                totalPago = totalPago.add(pagDTO.getValorPago());
-            }
-        }
-
-        // Valida se o valor total pago condiz com o total da venda
-        if (totalPago.compareTo(valorTotalCalculado) != 0) {
-            throw new BadRequestException("A soma dos pagamentos (" + totalPago + ") deve ser igual ao total da venda (" + valorTotalCalculado + ")");
-        }
+        processarPagamentosVenda(venda, vendaRequestDTO.getPagamentos(), valorTotalCalculado);
 
         venda.setValorTotal(valorTotalCalculado);
         return toResponseDTO(vendaRepository.save(venda)); // Atualiza o valor total no banco
@@ -207,22 +182,80 @@ public class VendaServiceImpl implements VendaService {
     public VendaResponseDTO editarVenda(Long id, VendaRequestDTO vendaRequestDTO){
         Venda vendaExistente = this.vendaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Venda", "id", id));
-
         // Impede a edição de uma venda desativada
         if (!vendaExistente.isActive()) {
             throw new ResourceNotFoundException("Venda", "id", id);
         }
 
-        // Exemplo de atualização de data se fornecida
+        // 1. REVERTER ESTOQUE DOS ITENS ANTIGOS E REMOVER ITENS/PAGAMENTOS ANTIGOS
+        List<ItemVenda> itensAntigos = itemVendaRepository.findByVenda_IdVenda(id);
+        for (ItemVenda itemAntigo : itensAntigos) {
+            Estoque estoqueProduto = estoqueRepository.findByProduto_IdProduto(itemAntigo.getProduto().getIdProduto())
+                    .stream().findFirst()
+                    .orElseThrow(() -> new ResourceNotFoundException("Estoque", "produto", itemAntigo.getProduto().getNomeProduto()));
+            estoqueProduto.setQuantidade(estoqueProduto.getQuantidade() + itemAntigo.getQuantidadeVendida());
+            estoqueRepository.save(estoqueProduto);
+        }
+        itemVendaRepository.deleteAll(itensAntigos); // Remove todos os itens antigos
+        vendaExistente.getPagamentos().clear(); // Remove os pagamentos antigos via orphanRemoval (definido na Model Venda)
+
+        // 2. ATUALIZAR DADOS DA VENDA (HEADER)
         if (vendaRequestDTO.getDataVenda() != null && !vendaRequestDTO.getDataVenda().isBlank()) {
-            vendaExistente.setDataVenda(LocalDateTime.parse(vendaRequestDTO.getDataVenda()));
+            // Ajustado para OffsetDateTime para suportar o formato ISO com timezone (Z) enviado pelo JS
+            vendaExistente.setDataVenda(OffsetDateTime.parse(vendaRequestDTO.getDataVenda()).toLocalDateTime());
+        } else {
+            // Se a data não for fornecida no DTO, mantém a data original da venda
+            // ou define como a data atual, dependendo da regra de negócio.
+            // Por enquanto, vamos manter a data original se não for explicitamente alterada.
         }
 
-        // Nota: Atualizar Itens e Pagamentos em uma venda existente exige 
-        // lógica para estornar estoque e substituir registros antigos.
+        // Atualiza o usuário responsável pela venda
+        if (vendaRequestDTO.getIdUser() != null) {
+            Usuario usuario = usuarioRepository.findById(vendaRequestDTO.getIdUser())
+                    .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", vendaRequestDTO.getIdUser()));
+            vendaExistente.setUser(usuario);
+        }
 
-        Venda atualizado = this.vendaRepository.save(vendaExistente);
-        return  toResponseDTO(atualizado);
+        BigDecimal valorTotalCalculado = BigDecimal.ZERO;
+
+        // 3. PROCESSAR NOVOS ITENS DA VENDA
+        if (vendaRequestDTO.getItens() != null) {
+            for (VendaRequestDTO.ItemVendaRequestDTO itemDTO : vendaRequestDTO.getItens()) {
+                Produto produto = produtoRepository.findById(itemDTO.getIdProduto())
+                        .orElseThrow(() -> new ResourceNotFoundException("Produto", "id", itemDTO.getIdProduto()));
+
+                // --- BAIXA DE ESTOQUE ---
+                List<Estoque> estoques = estoqueRepository.findByProduto_IdProduto(produto.getIdProduto());
+                if (estoques.isEmpty()) {
+                    throw new ResourceNotFoundException("Estoque", "produto", produto.getNomeProduto());
+                }
+                Estoque estoque = estoques.get(0);
+                if (estoque.getQuantidade() < itemDTO.getQuantidade()) {
+                    throw new BadRequestException("Estoque insuficiente para o produto: " + produto.getNomeProduto());
+                }
+                estoque.setQuantidade(estoque.getQuantidade() - itemDTO.getQuantidade());
+                estoqueRepository.save(estoque);
+
+                // --- REGISTRO DO NOVO ITEM DA VENDA ---
+                ItemVenda itemVenda = new ItemVenda();
+                itemVenda.setVenda(vendaExistente); // Vincula ao objeto de venda existente
+                itemVenda.setProduto(produto);
+                itemVenda.setQuantidadeVendida(itemDTO.getQuantidade());
+                itemVenda.setActive(true);
+                itemVendaRepository.save(itemVenda);
+
+                BigDecimal preco = produto.getValorUnitario();
+                BigDecimal quantidade = new BigDecimal(itemDTO.getQuantidade());
+                valorTotalCalculado = valorTotalCalculado.add(preco.multiply(quantidade));
+            }
+        }
+
+        // 4. PROCESSAR NOVOS PAGAMENTOS
+        processarPagamentosVenda(vendaExistente, vendaRequestDTO.getPagamentos(), valorTotalCalculado);
+        vendaExistente.setValorTotal(valorTotalCalculado); // Atualiza o valor total calculado para refletir na edição
+
+        Venda atualizado = this.vendaRepository.save(vendaExistente); // Salva a venda com o novo valor total
+        return toResponseDTO(atualizado);
     }
 
     @Override
@@ -235,6 +268,45 @@ public class VendaServiceImpl implements VendaService {
         vendaRepository.save(venda);
     }
 
+    /**
+     * Método auxiliar para processar pagamentos, validar o total e persistir os registros.
+     */
+    private void processarPagamentosVenda(Venda venda, List<PagamentoRequestDTO> pagamentosDTO, BigDecimal valorTotalCalculado) {
+        BigDecimal totalPago = BigDecimal.ZERO;
+        
+        // Garante que a lista de pagamentos na entidade não seja nula
+        if (venda.getPagamentos() == null) {
+            venda.setPagamentos(new java.util.ArrayList<>());
+        }
+
+        if (pagamentosDTO != null) {
+            for (PagamentoRequestDTO pagDTO : pagamentosDTO) {
+                FormaPagamento tipo;
+                try {
+                    tipo = FormaPagamento.paraEnum(pagDTO.getFormaPagamento());
+                } catch (IllegalArgumentException e) {
+                    throw new BadRequestException(e.getMessage());
+                }
+
+                if (FormaPagamento.CARTAO_CREDITO.equals(tipo) && pagDTO.getParcelas() > 4) {
+                    throw new BadRequestException("O parcelamento no cartão de crédito é permitido em até 4x.");
+                }
+
+                PagamentoVenda pag = new PagamentoVenda();
+                pag.setVenda(venda);
+                pag.setFormaPagamento(tipo);
+                pag.setValorPago(pagDTO.getValorPago());
+                pag.setParcelas(pagDTO.getParcelas());
+                
+                venda.getPagamentos().add(pag); // Adiciona à lista para garantir integridade via cascade
+                pagamentoVendaRepository.save(pag);
+                totalPago = totalPago.add(pagDTO.getValorPago());
+            }
+        }
+        if (totalPago.compareTo(valorTotalCalculado) != 0) {
+            throw new BadRequestException("A soma dos pagamentos (" + totalPago + ") deve ser igual ao total da venda (" + valorTotalCalculado + ")");
+        }
+    }
 
 
 
@@ -251,7 +323,13 @@ public class VendaServiceImpl implements VendaService {
                 venda.getDataVenda(),
                 venda.getValorTotal(),
                 venda.isActive(),
-                new UsuarioResponseDTO(venda.getUser().getId(), venda.getUser().getNome(), venda.getUser().getEmail())
+                new UsuarioResponseDTO(
+                    venda.getUser().getId(), 
+                    venda.getUser().getNome(), 
+                    venda.getUser().getEmail(), 
+                    venda.getUser().getRole(),
+                    venda.getUser().isActive()
+                )
         );
 
     }

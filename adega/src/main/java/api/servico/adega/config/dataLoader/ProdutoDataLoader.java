@@ -26,23 +26,42 @@ public class ProdutoDataLoader implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         if (produtoRepository.count() == 0) {
-            // Criando produtos com os campos exatos do seu Model
             Produto p1 = new Produto();
             p1.setNomeProduto("Vinho Tinto Malbec");
             p1.setTipoProduto("Vinho");
             p1.setValorUnitario(new BigDecimal("85.90"));
 
             Produto p2 = new Produto();
-            p2.setNomeProduto("Cerveja Artesanal Stout");
+            p2.setNomeProduto("Cerveja Heineken 600ml");
             p2.setTipoProduto("Cerveja");
-            p2.setValorUnitario(new BigDecimal("22.00"));
+            p2.setValorUnitario(new BigDecimal("14.50"));
 
             Produto p3 = new Produto();
             p3.setNomeProduto("Whisky Single Malt");
             p3.setTipoProduto("Destilado");
             p3.setValorUnitario(new BigDecimal("280.00"));
 
-            produtoRepository.saveAll(List.of(p1, p2, p3));
+            Produto p4 = new Produto();
+            p4.setNomeProduto("Gin Tanqueray");
+            p4.setTipoProduto("Destilado");
+            p4.setValorUnitario(new BigDecimal("120.00"));
+
+            Produto p5 = new Produto();
+            p5.setNomeProduto("Batata Pringles Original");
+            p5.setTipoProduto("Snack");
+            p5.setValorUnitario(new BigDecimal("18.90"));
+
+            Produto p6 = new Produto();
+            p6.setNomeProduto("Amendoim Japonês");
+            p6.setTipoProduto("Snack");
+            p6.setValorUnitario(new BigDecimal("8.50"));
+
+            Produto p7 = new Produto();
+            p7.setNomeProduto("Mix de Castanhas");
+            p7.setTipoProduto("Snack");
+            p7.setValorUnitario(new BigDecimal("15.00"));
+
+            produtoRepository.saveAll(List.of(p1, p2, p3, p4, p5, p6, p7));
             System.out.println(">>> ProdutoDataLoader: Produtos de teste carregados.");
         }
     }

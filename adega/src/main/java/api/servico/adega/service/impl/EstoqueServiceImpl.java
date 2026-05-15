@@ -6,9 +6,9 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import api.servico.adega.exception.BadRequestException;
 import api.servico.adega.dto.responses.EstoqueResponseDTO;
 import api.servico.adega.dto.responses.ProdutoResponseDTO;
+import api.servico.adega.exception.BadRequestException;
 import api.servico.adega.exception.ResourceNotFoundException;
 import api.servico.adega.model.Estoque;
 import api.servico.adega.model.Produto;
@@ -61,9 +61,24 @@ public class EstoqueServiceImpl implements EstoqueService {
         }
         Produto produto = produtoRepository.findById(estoqueResponseDTO.getProduto().getIdProduto())
                 .orElseThrow(() -> new ResourceNotFoundException("Produto", "id", estoqueResponseDTO.getProduto().getIdProduto()));
-        Estoque estoque = new Estoque();
-        estoque.setProduto(produto);
-        estoque.setQuantidade(estoqueResponseDTO.getQuantidade());
+
+        // Busca se já existe um registro de estoque para este produto
+        // Usamos findByProduto_IdProduto e pegamos o primeiro se existir
+        Estoque estoque = estoqueRepository.findByProduto_IdProduto(produto.getIdProduto())
+                .stream()
+                .findFirst()
+                .orElse(null);
+        
+        if (estoque != null) {
+            // Se já existe, somamos a nova quantidade à atual (Entrada)
+            estoque.setQuantidade(estoque.getQuantidade() + estoqueResponseDTO.getQuantidade());
+        } else {
+            // Se não existe, criamos o registro pela primeira vez
+            estoque = new Estoque();
+            estoque.setProduto(produto);
+            estoque.setQuantidade(estoqueResponseDTO.getQuantidade());
+        }
+
         Estoque saved = estoqueRepository.save(estoque);
         return toResponseDTO(saved);
     }

@@ -1,6 +1,7 @@
 import logout from '../conection/logout.js';
-import { carregarHistoricoVendas } from './historico.js';
+import { loadSidebar } from '../modules/sidebar.js';
 import { 
+    carregarHistoricoVendas,
     verDetalhesVenda, 
     excluirVenda, 
     prepararEdicaoVenda, 
@@ -9,7 +10,9 @@ import {
     adicionarLinhaPagamento,
     toggleParcelas,
     atualizarResumoTotal,
-    atualizarTotalPago
+    atualizarTotalPago,
+    aplicarFiltrosVendas,
+    limparFiltrosVendas
 } from './acoes.js';
 import { abrirModal, fecharModal, fecharAoClicarFora } from '../modules/modal.js';
 
@@ -24,7 +27,10 @@ window.adicionarLinhaPagamento = adicionarLinhaPagamento;
 window.toggleParcelas = toggleParcelas;
 window.atualizarResumoTotal = atualizarResumoTotal;
 window.atualizarTotalPago = atualizarTotalPago;
+window.aplicarFiltrosVendas = aplicarFiltrosVendas;
+window.limparFiltrosVendas = limparFiltrosVendas;
 window.fecharModal = fecharModal;
 
 window.addEventListener('click', fecharAoClicarFora);
+document.addEventListener('DOMContentLoaded', loadSidebar);
 document.addEventListener('DOMContentLoaded', carregarHistoricoVendas);

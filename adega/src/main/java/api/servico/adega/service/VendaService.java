@@ -2,6 +2,9 @@ package api.servico.adega.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import api.servico.adega.dto.requests.VendaRequestDTO;
 import api.servico.adega.dto.responses.VendaResponseDTO;
 
@@ -40,15 +43,17 @@ public interface VendaService {
     /*
     * Pesquisar a venda por data
     */
-    List<VendaResponseDTO> buscarPorData(String data);
+    Page<VendaResponseDTO> buscarPorData(String data, Pageable pageable);
 
     /* 
     * Pesquisar por id de usuário 
     */
-    List<VendaResponseDTO> buscarPorIdUsuario(Long id);
+    Page<VendaResponseDTO> buscarPorIdUsuario(Long id, Pageable pageable);
 
     /*
     * Pesquisar por forma de pagamento 
     */
-    List<VendaResponseDTO> buscarPorFormaPagamento(String formaPagamento);
+    Page<VendaResponseDTO> buscarPorFormaPagamento(String formaPagamento, Pageable pageable);
+
+    Page<VendaResponseDTO> listarVendasPaginadas(Pageable pageable);
 }

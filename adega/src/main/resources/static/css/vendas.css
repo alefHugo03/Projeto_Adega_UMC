@@ -1,5 +1,42 @@
 /* Estilos específicos para a página de Vendas */
 
+/* Barra de Filtros Ultra Compacta */
+.filter-card {
+    padding: 10px 15px !important; /* Reduz drasticamente o espaço interno */
+    margin-bottom: 1.5rem !important;
+    min-height: auto !important;
+}
+
+.filter-title {
+    font-size: 0.8rem !important;
+    color: var(--primary-color);
+    font-weight: 700;
+    margin-right: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.filter-card .form-control {
+    height: 32px !important; /* Altura reduzida para inputs e selects */
+    font-size: 0.85rem !important;
+    padding: 0 8px !important;
+    width: auto;
+    display: inline-block;
+}
+
+/* Larguras fixas para evitar o efeito desalinhado */
+#filter-data-venda { width: 145px !important; }
+#filter-usuario-id { width: 100px !important; }
+#filter-forma-pagamento { width: 160px !important; }
+
+.filter-btn {
+    height: 32px !important;
+    padding: 0 15px !important;
+    font-size: 0.85rem !important;
+    display: flex;
+    align-items: center;
+}
+
 /* --- Estilos do Modal (Popup) --- */
 .modal-overlay {
     position: absolute; /* Muda de fixo (tela toda) para absoluto (dentro do main-content) */
@@ -51,4 +88,77 @@
 
 .item-venda-card p {
     margin-bottom: 0.5rem;
+}
+
+/* Container para alinhar os 4 cards em uma linha */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 colunas iguais */
+    gap: 15px;
+    width: 100%;
+}
+
+/* Estilos para os Stats do Dashboard */
+.stats-card {
+    padding: 15px 10px !important;
+    display: flex !important;
+    flex-direction: column !important; /* Agora os elementos ficam um abaixo do outro */
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    min-height: 130px !important; /* Aumentamos um pouco a altura para acomodar o empilhamento */
+    border-left: 5px solid var(--primary-color); /* Efeito Power BI */
+    transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(212, 175, 55, 0.15) !important;
+}
+
+.stats-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    background: rgba(212, 175, 55, 0.1);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+}
+
+.stats-info-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centraliza o texto internamente */
+    text-align: center;
+    flex: 1;
+}
+
+.stats-label {
+    font-size: 0.75rem !important;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 2px !important;
+}
+
+.stats-value-highlight {
+    font-size: 1.2rem !important;
+    color: var(--primary-color);
+    font-weight: bold;
+    margin: 0 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 1024px) {
+    .stats-container { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+    .stats-container { grid-template-columns: 1fr; }
 }

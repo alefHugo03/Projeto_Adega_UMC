@@ -1,20 +1,21 @@
 package api.servico.adega.service.impl;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import api.servico.adega.dto.requests.ItemVendaRequestDTO;
 import api.servico.adega.dto.responses.ItemVendaResponseDTO;
 import api.servico.adega.dto.responses.ProdutoResponseDTO;
 import api.servico.adega.dto.responses.VendaResponseDTO;
 import api.servico.adega.exception.ResourceNotFoundException;
 import api.servico.adega.model.ItemVenda;
+import api.servico.adega.model.Venda;
 import api.servico.adega.repository.ItemVendaRepository;
 import api.servico.adega.repository.VendaRepository;
 import api.servico.adega.service.ItemVendaService;
-import api.servico.adega.model.Venda;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -32,7 +33,7 @@ public class ItemVendaServiceImpl implements ItemVendaService {
     public List<ItemVendaResponseDTO> buscarPorIdVenda(Long vendaId) {
         // Retorna apenas os itens vinculados à venda que estão ativos
         // Nota: Certifique-se que o método findByVenda_IdVenda existe no seu Repository
-        return itemVendaRepository.findAll()
+        return itemVendaRepository.findByVenda_IdVenda(vendaId)
                 .stream()
                 .filter(item -> item.isActive() && item.getVenda() != null && item.getVenda().getIdVenda().equals(vendaId))
                 .map(this::toResponseDTO)

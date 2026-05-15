@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 import jakarta.validation.Valid;
 
 import java.util.List;
@@ -68,6 +69,7 @@ public class UsuarioController {
      * Recebe um DTO de criação de usuário e devolve o usuário criado.
      */
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')") // Apenas usuários com ROLE_ADMIN podem acessar este endpoint
     public ResponseEntity<UsuarioResponseDTO> criarUsuario(@Valid @RequestBody UsuarioRequestDTO usuarioRequestDTO) {
         UsuarioResponseDTO criado = usuarioService.criarUsuario(usuarioRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(criado);
@@ -86,6 +88,7 @@ public class UsuarioController {
      * Exclui um usuário existente pelo ID.
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> excluirUsuario(@PathVariable Long id) {
         usuarioService.excluirUsuario(id);
         return ResponseEntity.noContent().build();

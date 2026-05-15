@@ -41,14 +41,16 @@ public class Usuario implements UserDetails {
     @Column(nullable = false)
     private String senha;
 
+    @Column(nullable = false)
+    private String role = "ROLE_USER";
+
     @Column(name = "is_active")
-    private boolean isActive;
+    private boolean isActive = true;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Retorna as permissões do usuário. No momento, todos os usuários recebem o perfil "ROLE_USER".
-        // Isso resolve o erro "getAuthorities() is undefined" que ocorria no filtro de segurança.
-        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        // Retorna a permissão real do usuário (ex: ROLE_ADMIN ou ROLE_USER)
+        return List.of(new SimpleGrantedAuthority(role));
     }
 
     @Override

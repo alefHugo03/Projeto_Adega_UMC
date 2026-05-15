@@ -54,7 +54,6 @@ public class UsuarioServiceImpl implements UsuarioService, UserDetailsService {
     public List<UsuarioResponseDTO> listarTodos() {
         return usuarioRepository.findAll()
                 .stream()
-                .filter(Usuario::isActive)
                 .map(this::toResponseDTO)
                 .toList();
     }
@@ -136,7 +135,6 @@ public class UsuarioServiceImpl implements UsuarioService, UserDetailsService {
     public List<UsuarioResponseDTO> buscarPorNome(String nome) {
         return usuarioRepository.findByNomeContainingIgnoreCase(nome)
                 .stream()
-                .filter(Usuario::isActive)
                 .map(this::toResponseDTO)
                 .toList();
     }
@@ -147,7 +145,6 @@ public class UsuarioServiceImpl implements UsuarioService, UserDetailsService {
     @Override
     public UsuarioResponseDTO buscarPorEmail(String email) {
         Usuario usuario = usuarioRepository.findByEmail(email)
-                .filter(Usuario::isActive)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "email", email));
         return toResponseDTO(usuario);
     }
@@ -159,7 +156,9 @@ public class UsuarioServiceImpl implements UsuarioService, UserDetailsService {
         return new UsuarioResponseDTO(
                 usuario.getId(),
                 usuario.getNome(),
-                usuario.getEmail()
+                usuario.getEmail(),
+                usuario.getRole(),
+                usuario.isActive()
         );
     }
 

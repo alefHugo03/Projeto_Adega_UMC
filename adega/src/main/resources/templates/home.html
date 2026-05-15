@@ -3,28 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Adega UMC</title>
+    <title>Dashboard - Adego Systems</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/dashboard.css}">
     <link rel="stylesheet" th:href="@{/css/home.css}">
     <!-- Importação do Chart.js via CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="dashboard-body">
     <div class="layout-wrapper">
-        <!-- Barra Lateral de Navegação -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2>Adega UMC</h2>
-            </div>
-            <nav class="sidebar-nav">
-                <a th:href="@{/home}" class="active">Dashboard</a>
-                <a th:href="@{/produtos}">Produtos</a>
-                <a th:href="@{/estoque}">Estoque</a>
-                <a th:href="@{/vendas}" >Vendas</a>
-                <button class="btn-logout-sidebar" onclick="window.logout()">Sair</button>
-            </nav>
-        </aside>
+        <!-- Sidebar injetada via JS -->
+        <div id="sidebar-container"></div>
 
         <!-- Conteúdo Principal -->
         <main class="main-content">
@@ -36,22 +27,75 @@
             </header>
 
             <div class="dashboard-grid">
-                <section class="card chart-card">
-                    <h3>Níveis de Estoque</h3>
+                <section class="card chart-card grid-col-span-2">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 id="chart-title">Selecione um Gráfico</h3>
+                        <select id="chart-selector" class="form-control" style="width: auto;">
+                            <option value="vendasTempo">Evolução de Vendas (Últimos 7 dias)</option>
+                            <option value="estoque">Estoque por Produto</option>
+                            <option value="vendedor">Vendas por Vendedor (R$)</option>
+                            <option value="categoria">Distribuição por Categoria</option>
+                            <option value="pagamento">Formas de Pagamento</option>
+                        </select>
+                    </div>
                     <div class="chart-container">
-                        <canvas id="estoqueChart"></canvas>
+                        <canvas id="mainChart"></canvas>
+                    </div>
+                    <p id="chart-description" class="text-muted mt-3" style="font-size: 0.9rem; font-style: italic;">
+                        Selecione um gráfico acima para ver os detalhes.
+                    </p>
+                </section>
+            </div>
+
+            <!-- Seção de Estatísticas Rápidas -->
+            <div class="stats-container mt-4">
+                <section class="card stats-card">
+                    <div class="stats-icon-wrapper"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="stats-info-wrapper">
+                        <h4 class="stats-label">Estoque Crítico</h4>
+                        <div id="stats-estoque-critico" class="stats-value-list">
+                            <!-- Injetado via JS -->
+                        </div>
                     </div>
                 </section>
 
-                <section class="card chart-card">
-                    <h3>Distribuição por Categoria</h3>
-                    <div class="chart-container">
-                        <canvas id="categoriaChart"></canvas>
+                <section class="card stats-card">
+                    <div class="stats-icon-wrapper"><i class="fas fa-trophy"></i></div>
+                    <div class="stats-info-wrapper">
+                        <h4 class="stats-label">Vendedor Destaque</h4>
+                        <p id="stats-melhor-vendedor" class="stats-value-highlight">---</p>
+                        <small id="stats-vendedor-valor" class="text-muted"></small>
+                    </div>
+                </section>
+
+                <section class="card stats-card">
+                    <div class="stats-icon-wrapper"><i class="fas fa-chart-line"></i></div>
+                    <div class="stats-info-wrapper">
+                        <h4 class="stats-label">Ticket Médio</h4>
+                        <p id="stats-ticket-medio" class="stats-value-highlight">R$ 0,00</p>
+                        <small class="text-muted">Média por venda</small>
+                    </div>
+                </section>
+
+                <section class="card stats-card">
+                    <div class="stats-icon-wrapper"><i class="fas fa-vault"></i></div>
+                    <div class="stats-info-wrapper">
+                        <h4 class="stats-label">Patrimônio em Estoque</h4>
+                        <p id="stats-valor-estoque" class="stats-value-highlight">R$ 0,00</p>
+                        <small class="text-muted">Valor total em produtos</small>
                     </div>
                 </section>
             </div>
         </main>
     </div>
     <script type="module" th:src="@{/js/home/home.js}"></script>
+    <script type="module">
+        import { loadSidebar } from '../js/modules/sidebar.js';
+        import logout from '../js/conection/logout.js';
+
+        window.logout = logout;
+        // Carrega a sidebar e ajusta a visibilidade do menu de usuários
+        document.addEventListener('DOMContentLoaded', loadSidebar);
+    </script>
 </body>
 </html>

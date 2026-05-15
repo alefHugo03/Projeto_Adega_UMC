@@ -6,7 +6,7 @@ import { abrirModal, fecharModal } from '../modules/modal.js';
 window.logout = logout;
 const moneyFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
-async function carregarProdutos() {
+export async function carregarProdutos() {
     try {
         const produtos = await requisitarDados('/api/produtos', 'GET');
         const tbody = document.getElementById('tabela-produtos-body');
@@ -44,13 +44,16 @@ async function carregarProdutos() {
     }
 }
 
-window.salvarProduto = async (event) => {
+export const salvarProduto = async (event) => {
     event.preventDefault();
     const id = document.getElementById('produto-id').value;
+    const valorInput = document.getElementById('produto-valor').value || "0";
+    
     const dados = {
         nomeProduto: document.getElementById('produto-nome').value,
         tipoProduto: document.getElementById('produto-tipo').value,
-        valorUnitario: document.getElementById('produto-valor').value // O backend já trata o parse de String para BigDecimal
+        // Correção: Garante que o valor numérico use ponto como separador decimal para o BigDecimal do Java
+        valorUnitario: valorInput.replace(',', '.')
     };
 
     const isEdicao = id && id.trim() !== "";
@@ -64,14 +67,14 @@ window.salvarProduto = async (event) => {
     }
 };
 
-window.prepararCriacao = () => {
+export const prepararCriacao = () => {
     document.getElementById('form-produto')?.reset();
     if (document.getElementById('produto-id')) document.getElementById('produto-id').value = '';
     if (document.getElementById('modal-produto-titulo')) document.getElementById('modal-produto-titulo').textContent = "Novo Produto";
     abrirModal('modal-produto');
 };
 
-window.prepararEdicao = async (id) => {
+export const prepararEdicao = async (id) => {
     try {
         const produto = await requisitarDados(`/api/produtos/${id}`, 'GET');
         if (document.getElementById('produto-id')) document.getElementById('produto-id').value = produto.idProduto || id;
@@ -86,7 +89,7 @@ window.prepararEdicao = async (id) => {
     }
 };
 
-window.excluirProduto = async (id, nome) => {
+export const excluirProduto = async (id, nome) => {
     if (confirm(`Deseja realmente excluir o produto "${nome}"?`)) {
         try {
             await requisitarDados(`/api/produtos/${id}`, 'DELETE');

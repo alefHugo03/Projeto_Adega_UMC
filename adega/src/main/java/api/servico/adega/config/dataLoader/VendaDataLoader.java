@@ -2,6 +2,8 @@ package api.servico.adega.config.dataLoader;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Random;
+import java.util.List;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
@@ -35,34 +37,31 @@ public class VendaDataLoader implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         if (vendaRepository.count() == 0) {
-            Usuario vendedor = usuarioRepository.findByEmail("vendedor@vendedor.com").orElse(null);
+            // Busca todos os vendedores ativos (não admins) para a competição
+            List<Usuario> vendedores = usuarioRepository.findAll().stream()
+                    .filter(u -> u.isActive() && !"ROLE_ADMIN".equals(u.getRole()))
+                    .toList();
 
-            if (vendedor != null) {
-                Venda v1 = new Venda();
-                v1.setValorTotal(new BigDecimal("107.90"));
-                v1.setDataVenda(LocalDateTime.now());
-                v1.setUser(vendedor);
-                v1.setActive(true);
-                vendaRepository.save(v1);
-                pagamentoVendaRepository.save(new PagamentoVenda(null, v1, FormaPagamento.CARTAO_CREDITO, v1.getValorTotal(), 1));
+            Random random = new Random();
 
-                Venda v2 = new Venda();
-                v2.setValorTotal(new BigDecimal("280.00"));
-                v2.setDataVenda(LocalDateTime.now().minusDays(1));
-                v2.setUser(vendedor); // Corrigido de sLcUser para setUser
-                v2.setActive(true);
-                vendaRepository.save(v2);
-                pagamentoVendaRepository.save(new PagamentoVenda(null, v2, FormaPagamento.PIX, v2.getValorTotal(), 1));
+            if (!vendedores.isEmpty()) {
+                for (int i = 0; i < 7; i++) {
+                    LocalDateTime dataDia = LocalDateTime.now().minusDays(i);
+                    for (int j = 0; j < 11; j++) { // 11 vendas por dia
+                        Venda venda = new Venda();
+                        venda.setDataVenda(dataDia.minusMinutes(j * 30));
+                        // Sorteia Alef, Richard ou Vitor para a venda
+                        venda.setUser(vendedores.get(random.nextInt(vendedores.size())));
+                        venda.setActive(true);
+                        venda.setValorTotal(BigDecimal.ZERO); // Valor será atualizado pelo ItemVendaDataLoader ou lógica de soma
+                        vendaRepository.save(venda);
 
-                Venda v3 = new Venda();
-                v3.setValorTotal(new BigDecimal("180.00"));
-                v3.setDataVenda(LocalDateTime.now().minusDays(2)); // Garantir que LocalDateTime está correto
-                v3.setUser(vendedor);
-                v3.setActive(true);
-                vendaRepository.save(v3);
-                pagamentoVendaRepository.save(new PagamentoVenda(null, v3, FormaPagamento.CARTAO_DEBITO, v3.getValorTotal(), 1));
-
-                System.out.println(">>> VendaDataLoader: Vendas de teste criadas.");
+                        // Adiciona um pagamento aleatório para a venda
+                        FormaPagamento forma = FormaPagamento.values()[random.nextInt(FormaPagamento.values().length)];
+                        pagamentoVendaRepository.save(new PagamentoVenda(null, venda, forma, BigDecimal.ZERO, 1));
+                    }
+                }
+                System.out.println(">>> VendaDataLoader: 77 vendas criadas (11 por dia nos últimos 7 dias).");
             }
         }
     }

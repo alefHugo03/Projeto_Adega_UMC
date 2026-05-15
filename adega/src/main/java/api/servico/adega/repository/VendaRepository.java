@@ -1,12 +1,13 @@
 package api.servico.adega.repository;
 
-import api.servico.adega.enums.FormaPagamento;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import api.servico.adega.enums.FormaPagamento;
 import api.servico.adega.model.Venda;
 
 public interface VendaRepository extends JpaRepository<Venda, Long>{
@@ -22,9 +23,9 @@ public interface VendaRepository extends JpaRepository<Venda, Long>{
     @Override
     boolean existsById(Long id);
 
-    List<Venda> findByDataVendaBetween(LocalDateTime inicio, LocalDateTime fim);
+    Page<Venda> findByDataVendaBetween(LocalDateTime inicio, LocalDateTime fim, Pageable pageable);
 
-    List<Venda> findByUser_Id(Long idUsuario);
+    Page<Venda> findByUser_Id(Long idUsuario, Pageable pageable);
 
-    List<Venda> findDistinctByPagamentos_FormaPagamento(FormaPagamento formaPagamento);
+    Page<Venda> findDistinctByPagamentos_FormaPagamento(FormaPagamento formaPagamento, Pageable pageable);
 }

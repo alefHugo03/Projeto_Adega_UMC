@@ -3,26 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vendas - Adega UMC</title>
+    <title>Vendas - Adego Systems</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/dashboard.css}">
     <link rel="stylesheet" th:href="@{/css/vendas.css}">
 </head>
 <body class="dashboard-body">
     <div class="layout-wrapper">
-        <!-- Barra Lateral -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2>Adega UMC</h2>
-            </div>
-            <nav class="sidebar-nav">
-                <a th:href="@{/home}">Dashboard</a>
-                <a th:href="@{/produtos}">Produtos</a>
-                <a th:href="@{/estoque}">Estoque</a>
-                <a th:href="@{/vendas}" class="active">Vendas</a>
-                <button class="btn-logout-sidebar" onclick="logout()">Sair</button>
-            </nav>
-        </aside>
+        <!-- Sidebar injetada via JS -->
+        <div id="sidebar-container"></div>
 
         <!-- Conteúdo Principal -->
         <main class="main-content">
@@ -34,6 +23,26 @@
                 <button class="btn btn-primary" onclick="iniciarNovaVenda()">+ Registrar Venda</button>
             </header>
 
+            <!-- Controles de Filtro Compactos -->
+            <section class="card filter-card">
+                <div class="d-flex align-items-center gap-2">
+                    <h5 class="mb-0 filter-title">FILTROS:</h5>
+                    <input type="date" id="filter-data-venda" class="form-control" title="Data da Venda">
+                    <input type="number" id="filter-usuario-id" class="form-control" placeholder="ID Vendedor">
+                    <select id="filter-forma-pagamento" class="form-control">
+                        <option value="">Todas as Formas</option>
+                        <option value="DINHEIRO">Dinheiro</option>
+                        <option value="PIX">Pix</option>
+                        <option value="CARTAO_DEBITO">Cartão de Débito</option>
+                        <option value="CARTAO_CREDITO">Cartão de Crédito</option>
+                    </select>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary filter-btn" onclick="window.aplicarFiltrosVendas()">Filtrar</button>
+                        <button class="btn btn-info filter-btn" onclick="window.limparFiltrosVendas()">Limpar</button>
+                    </div>
+                </div>
+            </section>
+
             <section class="card table-card">
                 <h3>Vendas Realizadas</h3>
                 <div class="table-container">
@@ -44,6 +53,27 @@
                         <tbody id="tabela-vendas-body"></tbody>
                     </table>
                 </div>
+
+                <!-- Controles de Paginação -->
+                <div class="d-flex justify-content-between align-items-center mt-3 p-2" style="background: #1A1A1A; border-radius: 8px;">
+                    <div>
+                        <button id="prev-page-btn" class="btn btn-primary btn-table-action" onclick="window.prevPage()">Anterior</button>
+                        <button id="next-page-btn" class="btn btn-primary btn-table-action" onclick="window.nextPage()">Próxima</button>
+                    </div>
+                    
+                    <span id="pagination-info" class="text-muted"></span>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <label for="page-size-select" style="font-size: 0.85rem;">Exibir:</label>
+                        <select id="page-size-select" class="form-control" style="width: auto; padding: 2px 10px;" onchange="window.changePageSize(this)">
+                            <option value="4">4 itens</option>
+                            <option value="7">7 itens</option>
+                            <option value="10" selected>10 itens</option>
+                            <option value="20">20 itens</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Fim dos Controles de Paginação -->
             </section>
         </main>
     </div>
@@ -57,13 +87,6 @@
             </div>
             <form id="form-venda" onsubmit="salvarVenda(event)">
                 <input type="hidden" id="venda-id">
-
-                <div class="form-group mb-2">
-                    <label for="venda-usuario">Vendedor:</label>
-                    <select id="venda-usuario" required>
-                        <option value="">Selecione um usuário...</option>
-                    </select>
-                </div>
 
                 <div class="form-group mb-2">
                     <label for="venda-produto">Produto:</label>
@@ -115,8 +138,12 @@
             </div>
             
             <div class="resumo-valores mb-3 p-2">
-                <strong>Resumo do Pagamento:</strong>
-                <p id="detalhe-pagamento-venda" class="mt-1" style="color: var(--primary-color); font-weight: bold; margin-bottom: 0;"></p>
+                <div class="d-flex justify-content-between">
+                    <span><strong>Vendedor:</strong> <span id="detalhe-vendedor-venda"></span></span>
+                </div>
+                <div class="mt-1">
+                    <strong>Pagamento:</strong> <span id="detalhe-pagamento-venda" style="color: var(--primary-color); font-weight: bold;"></span>
+                </div>
             </div>
 
             <div id="lista-itens-venda" class="itens-venda-grid mt-2">
@@ -127,7 +154,8 @@
             </div>
         </div>
     </div>
-
+    
+    <!-- Scripts --> 
     <script type="module" th:src="@{/js/vendas/vendas.js}"></script>
 </body>
 </html>
