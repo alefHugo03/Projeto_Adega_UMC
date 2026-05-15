@@ -1,6 +1,11 @@
 import requisitarDados from '../conection/query.js';
+import { handleAppError } from '../exception/exceptions.js';
 
-export async function carregarHistoricoVendas() {
+/**
+ * 
+ * Função para formatações da pagina da venda 
+ */
+async function carregarHistoricoVendas() {
     try {
         const vendas = await requisitarDados('/api/vendas', 'GET');
         const tbody = document.getElementById('tabela-vendas-body');
@@ -11,6 +16,7 @@ export async function carregarHistoricoVendas() {
         if (vendas && vendas.length > 0) {
             const moneyFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
+            
             vendas.forEach(venda => {
                 const idVenda = venda.idVenda || venda.id;
                 
@@ -47,6 +53,10 @@ export async function carregarHistoricoVendas() {
             tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Nenhuma venda encontrada.</td></tr>';
         }
     } catch (error) {
-        console.error('Erro ao carregar vendas:', error);
+        handleAppError(error);
+        const tbody = document.getElementById('tabela-vendas-body');
+        if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Erro ao carregar dados.</td></tr>';
     }
 }
+
+export default carregarHistoricoVendas;

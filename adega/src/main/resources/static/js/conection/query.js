@@ -1,4 +1,12 @@
-
+import { 
+    AuthenticationError, 
+    ForbiddenError, 
+    NotFoundError, 
+    ConflictError, 
+    ValidationError,
+    InternalServerError,
+    AppError 
+} from '../exception/exceptions.js'; // Ajustado para o caminho real fornecido no contexto
 
 async function requisitarDados(caminho, metodo, corpo = null) {
     const token = localStorage.getItem('jwt_token');
@@ -20,17 +28,11 @@ async function requisitarDados(caminho, metodo, corpo = null) {
         });
 
         if (!response.ok) {
-            // Se o servidor retornar 401 (Não autorizado) ou 403 (Proibido), 
-            // significa que o token expirou ou é inválido.
-            if (response.status === 401 || response.status === 403) {
-                localStorage.removeItem('jwt_token');
-                window.location.href = '/auth/logout';
-            }
-
-            // Tenta capturar a mensagem de erro detalhada do GlobalExceptionHandler
+            let corpoErro = null;
             let mensagemErro = `Erro na requisição: ${response.status}`;
+
             try {
-                const corpoErro = await response.json();
+                corpoErro = await response.json();
                 if (corpoErro && corpoErro.message) {
                     mensagemErro = corpoErro.message;
                 }
@@ -38,7 +40,20 @@ async function requisitarDados(caminho, metodo, corpo = null) {
                 mensagemErro += ` ${response.statusText}`;
             }
 
-            throw new Error(mensagemErro);
+            // Mapeamento de status HTTP para classes de exceção personalizadas
+            switch (response.status) {
+                case 400: throw new ValidationError(mensagemErro, corpoErro);
+                case 401:
+                    localStorage.removeItem('jwt_token');
+                    window.location.href = '/auth/logout';
+                    throw new AuthenticationError(mensagemErro, corpoErro);
+                case 403: throw new ForbiddenError(mensagemErro, corpoErro);
+                case 404: throw new NotFoundError(mensagemErro, corpoErro);
+                case 409: throw new ConflictError(mensagemErro, corpoErro);
+                case 500: throw new InternalServerError(mensagemErro, corpoErro);
+                default:
+                    throw new AppError(mensagemErro, response.status, corpoErro);
+            }
         }
 
         // Verifica se há conteúdo na resposta antes de tentar converter para JSON

@@ -1,3 +1,12 @@
+import { 
+    handleAppError, 
+    AuthenticationError, 
+    InvalidCredentialsError,
+    InternalServerError, 
+    ValidationError, 
+    AppError 
+} from '../exception/exceptions.js';
+
 /**
  * Configura o evento de submit do formulário quando a página carrega.
  */
@@ -34,15 +43,30 @@ async function realizarLogin(email, senha) {
             localStorage.setItem('jwt_token', data.token);
             document.cookie = `jwt_token=${data.token}; path=/; SameSite=Strict`;
             
-            console.log('Login realizado com sucesso!');
             // Redireciona para a página home após o sucesso
             window.location.href = '/home'; 
         } else {
-            const erro = await response.json();
-            alert('Erro ao entrar: ' + (erro.message || 'Verifique suas credenciais.'));
+            let corpoErro = null;
+            let mensagem = 'Erro inesperado no login.';
+            
+            try {
+                corpoErro = await response.json();
+                mensagem = corpoErro?.message || mensagem;
+            } catch (e) {
+                throw new InternalServerError(`Erro crítico do servidor (Status ${response.status})`);
+            }
+
+            // Mapeia o erro para a classe correta para o handleAppError funcionar
+            switch (response.status) {
+                case 400: throw new ValidationError(mensagem, corpoErro);
+                case 401: throw new InvalidCredentialsError(mensagem, corpoErro);
+                case 403: throw new ForbiddenError(mensagem, corpoErro);
+                case 500: throw new InternalServerError(mensagem, corpoErro);
+                default: throw new AppError(mensagem, response.status, corpoErro);
+            }
         }
     } catch (error) {
-        console.error('Erro na requisição de login:', error);
-        alert('Erro ao conectar com o servidor.');
+        // Utiliza a sua função centralizada para mostrar o alerta visual
+        handleAppError(error);
     }
 }

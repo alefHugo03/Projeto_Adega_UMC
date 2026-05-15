@@ -1,5 +1,6 @@
 import { abrirModal, fecharModal } from '../modules/modal.js';
 import requisitarDados from '../conection/query.js';
+import { handleAppError } from '../exception/exceptions.js';
 
 /**
  * Verifica se o usuário logado tem perfil de administrador decodificando o JWT.
@@ -49,8 +50,9 @@ export const salvarUsuario = async (e) => {
         alert('Usuário criado com sucesso!');
         fecharModal('modal-usuario');
         await carregarUsuarios();
-    } catch (err) {
-        alert('Erro ao criar usuário: ' + err.message);
+    } 
+    catch (error) {
+        handleAppError(error);
     }
 };
 
@@ -60,8 +62,8 @@ export const desativarUsuario = async (id) => {
             await requisitarDados(`/api/usuarios/${id}`, 'DELETE');
             alert('Usuário desativado com sucesso!');
             await carregarUsuarios();
-        } catch (err) {
-            alert('Erro ao desativar: ' + err.message);
+        } catch (error) {
+            handleAppError(error);
         }
     }
 };
@@ -84,7 +86,7 @@ export async function carregarUsuarios() {
                     ${(u.role !== 'ROLE_ADMIN' && u.active) ? `<button class="btn btn-danger btn-table-action" onclick="window.desativarUsuario(${u.id})">Desativar</button>` : '-'}
                 </td>
             </tr>`).join('');
-    } catch (err) {
-        console.error("Erro ao carregar lista de usuários:", err);
+    } catch (error) {
+        handleAppError(error);
     }
 }

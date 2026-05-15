@@ -1,7 +1,7 @@
 import requisitarDados from '../conection/query.js';
 import { abrirModal, fecharModal } from '../modules/modal.js';
 
-export async function carregarEstoque() {
+async function carregarEstoque() {
     try {
         const estoques = await requisitarDados('/api/estoques', 'GET');
         const tbody = document.getElementById('tabela-estoque-body');
@@ -36,7 +36,7 @@ export async function carregarEstoque() {
 /**
  * Prepara o modal para uma nova entrada de um produto que pode ou não estar na lista
  */
-export async function iniciarNovaEntrada() {
+async function iniciarNovaEntrada() {
     document.getElementById('form-estoque').reset();
     document.getElementById('estoque-id').value = '';
     
@@ -49,7 +49,7 @@ export async function iniciarNovaEntrada() {
     abrirModal('modal-estoque');
 }
 
-export function prepararEntradaEstoque(idEstoque, idProduto, nomeProduto, qtdAtual) {
+function prepararEntradaEstoque(idEstoque, idProduto, nomeProduto, qtdAtual) {
     document.getElementById('estoque-id').value = idEstoque || '';
     document.getElementById('estoque-produto-id').value = idProduto;
     
@@ -74,7 +74,7 @@ async function carregarProdutosNoSelect() {
     } catch (e) { console.error("Erro ao carregar produtos para entrada", e); }
 }
 
-export async function salvarEstoque(event) {
+async function salvarEstoque(event) {
     event.preventDefault();
     const idProdutoFixo = document.getElementById('estoque-produto-id').value;
     const idProdutoSelect = document.getElementById('estoque-produto-selecao').value;
@@ -96,3 +96,6 @@ export async function salvarEstoque(event) {
         alert('Erro ao atualizar estoque: ' + error.message);
     }
 }
+
+
+export { carregarEstoque,iniciarNovaEntrada,prepararEntradaEstoque,carregarProdutosNoSelect,salvarEstoque }

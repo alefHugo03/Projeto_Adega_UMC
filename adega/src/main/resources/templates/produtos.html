@@ -11,19 +11,8 @@
 <body class="dashboard-body">
     <div class="layout-wrapper">
         <!-- Barra Lateral de Navegação -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2>Adego Systems</h2>
-            </div>
-            <nav class="sidebar-nav">
-                <a th:href="@{/home}">Dashboard</a>
-                <a th:href="@{/produtos}" class="active">Produtos</a>
-                <a th:href="@{/estoque}">Estoque</a>
-                <a th:href="@{/vendas}" >Vendas</a>
-                <a th:href="@{/usuarios}" id="menu-usuarios">Usuários</a>
-                <button class="btn-logout-sidebar" onclick="window.logout()">Sair</button>
-            </nav>
-        </aside>
+        <div id="sidebar-container"></div>
+
 
         <!-- Conteúdo Principal -->
         <main class="main-content">
@@ -78,11 +67,11 @@
         </div>
     </div>
 
-    <script type="module" th:src="@{/js/produtos/produtos.js}"></script>
+    <script type="module" th:src="@{/js/produtos/acoes.js}"></script>
     <!-- Importa e expõe funções globais para o HTML -->
     <script type="module">
         import { abrirModal, fecharModal, fecharAoClicarFora } from '../js/modules/modal.js';
-        import { prepararCriacao, prepararEdicao, excluirProduto, salvarProduto } from '../js/produtos/produtos.js';
+        import { prepararCriacao, prepararEdicao, excluirProduto, salvarProduto } from '../js/produtos/acoes.js';
         import { loadSidebar } from '../js/modules/sidebar.js';
         import logout from '../js/conection/logout.js';
 

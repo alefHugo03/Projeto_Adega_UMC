@@ -22,14 +22,16 @@ const chartExplanations = {
 let currentChart = null; // Variável para armazenar a instância do gráfico atual
 let dashboardData = { estoques: [], vendas: [] }; // Armazena os dados carregados
 
+/* 
+*   Processamento dos dados 
+*/
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        const [estoques, responseVendas] = await Promise.all([ // Carrega todos os dados de uma vez
+        const [estoques, responseVendas] = await Promise.all([ 
             requisitarDados('/api/estoques', 'GET'),
-            requisitarDados('/api/vendas?size=1000', 'GET') // Aumentado para pegar todos os dados para o gráfico
+            requisitarDados('/api/vendas?size=1000', 'GET')
         ]);
 
-        // Como o backend agora é paginado, extraímos o conteúdo de .content
         const vendas = responseVendas && responseVendas.content ? responseVendas.content : (Array.isArray(responseVendas) ? responseVendas : []);
         dashboardData = { estoques, vendas }; 
 

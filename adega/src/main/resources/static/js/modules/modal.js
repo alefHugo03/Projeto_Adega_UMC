@@ -13,7 +13,6 @@ export function abrirModal(id = 'modal-detalhes') {
 }
 
 export function fecharAoClicarFora(event) {
-    // Se o alvo do clique for um elemento com a classe 'modal', fechamos ele usando o seu próprio ID
     if (event.target.classList.contains('modal')) {
         fecharModal(event.target.id);
     }

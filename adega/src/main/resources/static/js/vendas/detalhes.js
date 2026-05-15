@@ -1,5 +1,6 @@
 import requisitarDados from '../conection/query.js';
 import { abrirModal } from '../modules/modal.js';
+import { handleAppError } from '../exception/exceptions.js';
 
 export async function verDetalhesVenda(vendaId) {
     try {
@@ -41,8 +42,6 @@ export async function verDetalhesVenda(vendaId) {
             alert('Erro interno: Modal de detalhes não configurado no HTML.');
         }
     } catch (error) {
-        console.error('Erro ao buscar itens:', error);
-        const msg = error.message.includes('404') ? 'A API de itens não foi encontrada (404).' : 'Erro ao buscar itens da venda.';
-        alert(msg);
+        handleAppError(error);
     }
 }

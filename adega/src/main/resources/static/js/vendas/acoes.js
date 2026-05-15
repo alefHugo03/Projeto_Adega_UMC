@@ -1,6 +1,7 @@
 import requisitarDados from '../conection/query.js';
 import { abrirModal, fecharModal } from '../modules/modal.js';
-import excluir from '../conection/excluir.js';
+import { handleAppError } from '../exception/exceptions.js';
+// import excluir from '../conection/excluir.js'; // Este import não é utilizado e pode ser removido
 
 // Variáveis globais para controle de paginação
 let currentPage = 0;
@@ -12,7 +13,7 @@ let currentFilterPaymentMethod = '';
 /**
  * Busca e exibe os itens detalhados de uma venda
  */
-export async function verDetalhesVenda(vendaId) {
+async function verDetalhesVenda(vendaId) {
     try {
         // Busca itens e dados da venda simultaneamente
         const [itens, venda] = await Promise.all([
@@ -57,24 +58,32 @@ export async function verDetalhesVenda(vendaId) {
         }
         abrirModal('modal-detalhes');
     } catch (error) {
-        console.error('Erro ao buscar itens:', error);
-        alert('Erro ao carregar detalhes da venda.');
+        handleAppError(error);
     }
 }
 
 /**
  * Exclui uma venda permanentemente
  */
-export async function excluirVenda(idVenda) {
-    // Agora usamos a função genérica passando o callback de atualização
-    return excluir(`/api/itemvendas/venda/${idVenda.trim()}`, 'Venda', carregarHistoricoVendas);
+async function excluirVenda(idVenda) {
+    try {
+        if (confirm('Tem certeza que deseja excluir esta venda? Esta ação não pode ser desfeita.')) {
+            // Assumindo que a exclusão de uma venda deve ser feita no endpoint principal de vendas
+            // e que o backend lida com a exclusão em cascata dos itens de venda.
+            await requisitarDados(`/api/vendas/${idVenda.trim()}`, 'DELETE');
+            alert('Venda excluída com sucesso!');
+            await carregarHistoricoVendas(); // Recarrega a lista de vendas após a exclusão
+        }
+    } catch (error) {
+        handleAppError(error);
+    }
 }
 
 
 /**
  * Prepara o formulário para edição carregando os dados existentes
  */
-export async function prepararEdicaoVenda(id) {
+async function prepararEdicaoVenda(id) {
     try {
         // 1. Limpeza e preparação inicial do formulário para evitar "sujeira" de vendas anteriores
         // Garante que o formulário é resetado e os pagamentos antigos são removidos
@@ -132,8 +141,7 @@ export async function prepararEdicaoVenda(id) {
         atualizarResumoTotal();
         abrirModal('modal-venda');
     } catch (error) {
-        console.error('Erro ao buscar dados da venda:', error);
-        alert('Erro ao carregar dados para edição.');
+        handleAppError(error);
     }
 }
 
@@ -142,7 +150,7 @@ export async function prepararEdicaoVenda(id) {
  * Salva (Cria ou Atualiza) uma venda.
  * Agora estruturado para criar o ItemPedido relacionando Venda, Produto e Usuário.
  */
-export async function salvarVenda(event) {
+async function salvarVenda(event) {
     if (event && event.preventDefault) event.preventDefault();
     
     // Obtém o ID do usuário do Token JWT
@@ -205,14 +213,14 @@ export async function salvarVenda(event) {
         fecharModal('modal-venda');
         await carregarHistoricoVendas();
     } catch (error) {
-        alert('Erro ao processar venda: ' + error.message);
+        handleAppError(error);
     }
 }
 
 /**
  * Calcula e atualiza visualmente a soma dos pagamentos informados
  */
-export function atualizarTotalPago() {
+function atualizarTotalPago() {
     const rows = document.querySelectorAll('.linha-pagamento');
     let soma = 0;
     rows.forEach(row => {
@@ -237,7 +245,7 @@ export function atualizarTotalPago() {
 /**
  * Adiciona uma nova linha de pagamento dinamicamente
  */
-export function adicionarLinhaPagamento(pagamento = null) { // Aceita um objeto de pagamento opcional
+function adicionarLinhaPagamento(pagamento = null) { // Aceita um objeto de pagamento opcional
     const container = document.getElementById('container-pagamentos');
     if (!container) {
         console.error("Erro: O elemento 'container-pagamentos' não foi encontrado no HTML.");
@@ -280,7 +288,7 @@ export function adicionarLinhaPagamento(pagamento = null) { // Aceita um objeto 
 /**
  * Mostra/esconde o select de parcelas dependendo da forma de pagamento
  */
-export function toggleParcelas(select) {
+function toggleParcelas(select) {
     const row = select.parentElement;
     const selectParcelas = row.querySelector('.pag-parcelas');
     selectParcelas.style.display = select.value === 'CARTAO_CREDITO' ? 'block' : 'none';
@@ -290,7 +298,7 @@ export function toggleParcelas(select) {
 /**
  * Atualiza o label do valor total no modal
  */
-export function atualizarResumoTotal() {
+function atualizarResumoTotal() {
     const qty = parseInt(document.getElementById('venda-quantidade')?.value) || 0;
     const preco = extrairPrecoDoSelect();
     const total = qty * preco;
@@ -332,7 +340,7 @@ async function carregarProdutosNoSelect() {
     }
 }
 
-export async function iniciarNovaVenda() { // Make it async
+async function iniciarNovaVenda() { // Make it async
     const form = document.getElementById('form-venda');
     if (form) {
         form.reset();
@@ -356,7 +364,7 @@ export async function iniciarNovaVenda() { // Make it async
  * @param {number} page - O número da página a ser carregada (0-indexed).
  * @param {number} size - O número de itens por página.
  */
-export async function carregarHistoricoVendas(page = currentPage, size = pageSize, filterDate = currentFilterDate, filterUserId = currentFilterUserId, filterPaymentMethod = currentFilterPaymentMethod) {
+async function carregarHistoricoVendas(page = currentPage, size = pageSize, filterDate = currentFilterDate, filterUserId = currentFilterUserId, filterPaymentMethod = currentFilterPaymentMethod) {
     // Se disparado por evento (ex: DOMContentLoaded), 'page' será um objeto Event. 
     // Precisamos garantir que usamos os valores numéricos.
     const pageToLoad = (typeof page === 'number') ? page : currentPage;
@@ -437,7 +445,7 @@ export async function carregarHistoricoVendas(page = currentPage, size = pageSiz
         updatePaginationControls(totalPages, totalElements);
 
     } catch (error) {
-        console.error('Erro ao carregar histórico de vendas:', error);
+        handleAppError(error);
         const tbody = document.getElementById('tabela-vendas-body');
         if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Erro ao carregar dados do servidor.</td></tr>';
     }
@@ -454,7 +462,7 @@ function updatePaginationControls(totalPages, totalElements) {
 }
 
 // Nova função para aplicar os filtros
-export function aplicarFiltrosVendas() {
+function aplicarFiltrosVendas() {
     const filterDateInput = document.getElementById('filter-data-venda'); // Assumindo que este ID existe no HTML
     const filterUserIdInput = document.getElementById('filter-usuario-id'); // Assumindo que este ID existe no HTML
     const filterPaymentMethodSelect = document.getElementById('filter-forma-pagamento'); // Assumindo que este ID existe no HTML
@@ -469,7 +477,7 @@ export function aplicarFiltrosVendas() {
 }
 
 // Função para limpar filtros
-export function limparFiltrosVendas() {
+function limparFiltrosVendas() {
     const filterDateInput = document.getElementById('filter-data-venda');
     const filterUserIdInput = document.getElementById('filter-usuario-id');
     const filterPaymentMethodSelect = document.getElementById('filter-forma-pagamento');
@@ -499,7 +507,7 @@ window.limparFiltrosVendas = limparFiltrosVendas;
 window.iniciarNovaVenda = iniciarNovaVenda;
 
 // Funções de paginação para serem chamadas do HTML
-export const goToPage = (pageNumberOrEvent) => {
+const goToPage = (pageNumberOrEvent) => {
     let pageToLoad;
     if (typeof pageNumberOrEvent === 'number') {
         pageToLoad = pageNumberOrEvent;
@@ -514,7 +522,7 @@ export const goToPage = (pageNumberOrEvent) => {
     carregarHistoricoVendas(currentPage, pageSize, currentFilterDate, currentFilterUserId, currentFilterPaymentMethod);
 };
 
-export const changePageSize = (selectElement) => {
+const changePageSize = (selectElement) => {
     // Garante que selectElement é um elemento HTML e tem um valor numérico.
     // Se por algum motivo 'selectElement' não for um objeto com 'value', ou 'value' não for numérico,
     // ele irá default para o pageSize atual.
@@ -524,12 +532,12 @@ export const changePageSize = (selectElement) => {
     carregarHistoricoVendas(currentPage, pageSize, currentFilterDate, currentFilterUserId, currentFilterPaymentMethod); // Chama com os valores numéricos
 };
 
-export const nextPage = () => {
+const nextPage = () => {
     currentPage++; // currentPage já é um número, então a operação é segura.
     carregarHistoricoVendas(currentPage, pageSize, currentFilterDate, currentFilterUserId, currentFilterPaymentMethod);
 };
 
-export const prevPage = () => {
+const prevPage = () => {
     currentPage--;
     carregarHistoricoVendas(currentPage, pageSize, currentFilterDate, currentFilterUserId, currentFilterPaymentMethod);
 };
@@ -538,3 +546,22 @@ window.goToPage = goToPage;
 window.changePageSize = changePageSize;
 window.nextPage = nextPage;
 window.prevPage = prevPage;
+
+export {
+    verDetalhesVenda,
+    excluirVenda,
+    prepararEdicaoVenda,
+    salvarVenda,
+    atualizarTotalPago,
+    adicionarLinhaPagamento,
+    toggleParcelas,
+    atualizarResumoTotal,
+    iniciarNovaVenda,
+    carregarHistoricoVendas,
+    aplicarFiltrosVendas,
+    limparFiltrosVendas,
+    goToPage,
+    changePageSize,
+    nextPage,
+    prevPage
+}

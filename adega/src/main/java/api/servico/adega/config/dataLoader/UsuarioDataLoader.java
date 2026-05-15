@@ -1,13 +1,14 @@
 package api.servico.adega.config.dataLoader;
 
-import api.servico.adega.model.Usuario;
-import api.servico.adega.repository.UsuarioRepository;
+import java.util.List;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import api.servico.adega.model.Usuario;
+import api.servico.adega.repository.UsuarioRepository;
 
 /**
  * Responsável por criar os usuários iniciais do sistema.
@@ -54,7 +55,13 @@ public class UsuarioDataLoader implements CommandLineRunner {
             u3.setSenha(passwordEncoder.encode("vitor123"));
             u3.setActive(true);
 
-            usuarioRepository.saveAll(List.of(u1, u2, u3));
+            Usuario u4 = new Usuario();
+            u4.setNome("Arthur");
+            u4.setEmail("arthur@adego.com");
+            u4.setSenha(passwordEncoder.encode("arthur123"));
+            u4.setActive(true);
+
+            usuarioRepository.saveAll(List.of(u1, u2, u3, u4));
 
             System.out.println(">>> UsuarioDataLoader: Usuários Admin, Alef, Richard e Vitor criados.");
         }

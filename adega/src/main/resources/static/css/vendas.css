@@ -39,7 +39,7 @@
 
 /* --- Estilos do Modal (Popup) --- */
 .modal-overlay {
-    position: absolute; /* Muda de fixo (tela toda) para absoluto (dentro do main-content) */
+    position: fixed; /* Alterado para fixed para cobrir a viewport independente do scroll */
     top: 0;
     left: 0;
     width: 100%;    /* Ocupa toda a largura do main-content */
