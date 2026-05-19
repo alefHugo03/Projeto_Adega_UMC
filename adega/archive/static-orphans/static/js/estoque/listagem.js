@@ -1,5 +1,6 @@
-import requisitarDados from '../conection/query.js';
+import requisitarDados from '../../conection/query.js';
 
+// Carrega e renderiza uma listagem alternativa do estoque
 async function carregarEstoque() {
     try {
         const estoques = await requisitarDados('/api/estoques', 'GET');

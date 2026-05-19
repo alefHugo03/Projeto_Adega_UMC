@@ -70,7 +70,9 @@ async function excluirVenda(idVenda) {
         if (confirm('Tem certeza que deseja excluir esta venda? Esta ação não pode ser desfeita.')) {
             // Assumindo que a exclusão de uma venda deve ser feita no endpoint principal de vendas
             // e que o backend lida com a exclusão em cascata dos itens de venda.
-            await requisitarDados(`/api/vendas/${idVenda.trim()}`, 'DELETE');
+            // Convertendo para String antes do trim para evitar erro se id for Number
+            const idLimpo = String(idVenda).trim();
+            await requisitarDados(`/api/vendas/${idLimpo}`, 'DELETE');
             alert('Venda excluída com sucesso!');
             await carregarHistoricoVendas(); // Recarrega a lista de vendas após a exclusão
         }
@@ -99,6 +101,12 @@ async function prepararEdicaoVenda(id) {
             requisitarDados(`/api/pagamentos/venda/${id}`, 'GET').catch(() => []) // Fallback caso não exista a rota
         ]);
 
+        // Validação: Não permitir editar venda cancelada
+        if (venda.active === false) {
+            alert('🛑 Operação Inválida: Esta venda está cancelada e não pode ser editada.');
+            return;
+        }
+
         // 3. Validação de Prazo de 24 Horas
         const dataVenda = new Date(venda.dataVenda);
         const agora = new Date();
@@ -110,7 +118,10 @@ async function prepararEdicaoVenda(id) {
         }
 
         // 4. Carrega os produtos necessários
-        await carregarProdutosNoSelect();
+        // Passamos os dados do produto atual para garantir que ele apareça no select, 
+        // mesmo se estiver inativo ou sem estoque.
+        const produtoAtual = (itens && itens.length > 0) ? itens[0].produto : null;
+        await carregarProdutosNoSelect(produtoAtual);
 
         const campoId = document.getElementById('venda-id');
         if (campoId) campoId.value = id;
@@ -317,7 +328,7 @@ function extrairPrecoDoSelect() {
 /**
  * Busca os produtos da API e preenche o select no modal
  */
-async function carregarProdutosNoSelect() {
+async function carregarProdutosNoSelect(produtoForçado = null) {
     try {
         // Agora buscamos do estoque para garantir que listamos o que realmente está na adega
         const estoques = await requisitarDados('/api/estoques', 'GET');
@@ -325,8 +336,20 @@ async function carregarProdutosNoSelect() {
         if (select) {
             select.innerHTML = '<option value="">Selecione um produto...</option>';
             
-            // Filtramos apenas itens que possuem quantidade disponível
-            estoques.filter(item => item.quantidade > 0).forEach(item => {
+            // Criamos um Set para evitar IDs duplicados
+            const idsAdicionados = new Set();
+
+            // 1. Adicionamos o produto que já está na venda (se for edição)
+            if (produtoForçado) {
+                const opt = document.createElement('option');
+                opt.value = produtoForçado.idProduto;
+                opt.textContent = `${produtoForçado.nomeProduto} - R$ ${produtoForçado.valorUnitario.toFixed(2)} (Item atual)`;
+                select.appendChild(opt);
+                idsAdicionados.add(produtoForçado.idProduto);
+            }
+
+            // 2. Filtramos apenas itens que possuem quantidade disponível e ainda não estão no select
+            estoques.filter(item => item.quantidade > 0 && !idsAdicionados.has(item.produto.idProduto)).forEach(item => {
                 const p = item.produto;
                 const opt = document.createElement('option');
                 opt.value = p.idProduto;
@@ -428,9 +451,9 @@ async function carregarHistoricoVendas(page = currentPage, size = pageSize, filt
                         </span>
                     </td>
                     <td class="nowrap">
-                        <button class="btn btn-info btn-table-action" onclick="window.verDetalhesVenda(${venda.idVenda})">Detalhes</button>
-                        <button class="btn btn-warning btn-table-action" onclick="window.prepararEdicaoVenda(${venda.idVenda})">Editar</button>
-                        <button class="btn btn-danger btn-table-action" onclick="window.excluirVenda(${venda.idVenda})">Excluir</button>
+                        <button class="btn btn-info btn-table-action" onclick="window.verDetalhesVenda('${venda.idVenda}')">Detalhes</button>
+                        <button class="btn btn-warning btn-table-action" onclick="window.prepararEdicaoVenda('${venda.idVenda}')">Editar</button>
+                        <button class="btn btn-danger btn-table-action" onclick="window.excluirVenda('${venda.idVenda}')">Excluir</button>
                     </td>
                 `;
                 tbody.appendChild(tr);

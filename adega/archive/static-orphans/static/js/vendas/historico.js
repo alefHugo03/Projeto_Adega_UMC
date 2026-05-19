@@ -1,10 +1,7 @@
-import requisitarDados from '../conection/query.js';
-import { handleAppError } from '../exception/exceptions.js';
+import requisitarDados from '../../conection/query.js';
+import { handleAppError } from '../../exception/exceptions.js';
 
-/**
- * 
- * Função para formatações da pagina da venda 
- */
+// Carrega o histórico de vendas e renderiza a tabela de vendas na página.
 async function carregarHistoricoVendas() {
     try {
         const vendas = await requisitarDados('/api/vendas', 'GET');
@@ -16,30 +13,34 @@ async function carregarHistoricoVendas() {
         if (vendas && vendas.length > 0) {
             const moneyFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
-            
             vendas.forEach(venda => {
                 const idVenda = venda.idVenda || venda.id;
-                
-                // Formata a data para algo mais amigável: DD/MM/AAAA HH:mm
                 const dataFormatada = venda.dataVenda 
                     ? new Date(venda.dataVenda).toLocaleString('pt-BR') 
                     : 'N/A';
 
-                // Define o visual do status baseado no campo isActive (venda.active)
                 const statusBadge = venda.active 
                     ? '<span class="badge status-ok">Realizada</span>' 
                     : '<span class="badge status-danger">Cancelada</span>';
                 
-                const infoPagamento = venda.quantidadeParcelas > 1 
+                const isRetirada = venda.formaPagamento === 'RETIRADA_ADMIN';
+                
+                const infoPagamento = isRetirada 
+                    ? '<span style="color: #e74c3c; font-weight: bold;">[BAIXA ADMIN]</span>'
+                    : (venda.quantidadeParcelas > 1 
                     ? `${venda.formaPagamento} (${venda.quantidadeParcelas}x)` 
-                    : venda.formaPagamento;
+                    : venda.formaPagamento);
+
+                const valorDisplay = isRetirada ? '---' : moneyFormatter.format(venda.valorTotal || 0);
 
                 const tr = document.createElement('tr');
+                if (isRetirada) tr.style.backgroundColor = 'rgba(231, 76, 60, 0.05)';
+                
                 tr.innerHTML = `
                     <td>#${idVenda || '---'}</td>
                     <td>${dataFormatada}</td>
                     <td>${infoPagamento}</td>
-                    <td class="text-right">${moneyFormatter.format(venda.valorTotal || 0)}</td>
+                    <td class="text-right">${valorDisplay}</td>
                     <td>${statusBadge}</td>
                     <td>
                         <button class="btn btn-info btn-table-action" onclick="window.verDetalhesVenda('${idVenda}')">Itens</button>

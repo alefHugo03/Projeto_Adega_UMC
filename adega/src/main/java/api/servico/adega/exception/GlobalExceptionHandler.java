@@ -1,23 +1,30 @@
 package api.servico.adega.exception;
 
+import java.util.Objects;
 import java.time.LocalDateTime;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
      * Trata a exceção ResourceNotFoundException e retorna erro 404.
@@ -26,20 +33,33 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * a aplicação retorna um 404 com mensagem descritiva.
      */
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<?> handleResourceNotFoundException(
-            ResourceNotFoundException ex,
-            HttpServletRequest request) {
+    public Object handleResourceNotFoundException(
+            ResourceNotFoundException ex, HttpServletRequest request) {
+        
+        // Se a requisição vier de um navegador (HTML), redireciona. Caso contrário, retorna JSON.
+        String accept = request.getHeader("Accept");
+        if (accept != null && accept.contains("text/html")) {
+            return "error/404"; // Renderiza a página HTML de erro
+        }
 
         ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.NOT_FOUND.value(),
-                ex.getMessage(),
-                LocalDateTime.now(),
-                request.getRequestURI()
-        );
+                HttpStatus.NOT_FOUND.value(), ex.getMessage(), LocalDateTime.now(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
 
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(errorResponse);
+    /**
+     * Trata erros de recursos estáticos ou rotas não encontradas (404 padrão do Spring).
+     */
+    @Override
+    protected ResponseEntity<Object> handleNoResourceFoundException(
+            @NonNull NoResourceFoundException ex, 
+            @NonNull HttpHeaders headers, 
+            @NonNull HttpStatusCode status, 
+            @NonNull WebRequest request) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(), "Rota não encontrada: " + ex.getResourcePath(), LocalDateTime.now(), request.getDescription(false).replace("uri=", ""));
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
     /**
@@ -127,10 +147,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex,
-            HttpHeaders headers,
-            HttpStatusCode status,
-            WebRequest request) {
+            @NonNull MethodArgumentNotValidException ex,
+            @NonNull HttpHeaders headers,
+            @NonNull HttpStatusCode status,
+            @NonNull WebRequest request) {
         
         String mensagem = "Erro de validação: " + ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
@@ -189,8 +209,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<?> handleGenericException(
             Exception ex,
             WebRequest request) {
-
-        ex.printStackTrace(); // Adicione isso para ver o erro real nos logs do Docker
+        
+        log.error("Erro interno capturado pelo GlobalExceptionHandler: ", ex);
 
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),

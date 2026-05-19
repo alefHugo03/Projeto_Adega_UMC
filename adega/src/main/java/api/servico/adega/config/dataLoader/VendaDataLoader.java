@@ -61,7 +61,6 @@ public class VendaDataLoader implements CommandLineRunner {
                         pagamentoVendaRepository.save(new PagamentoVenda(null, venda, forma, BigDecimal.ZERO, 1));
                     }
                 }
-                System.out.println(">>> VendaDataLoader: 77 vendas criadas (11 por dia nos últimos 7 dias).");
             }
         }
     }

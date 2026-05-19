@@ -75,7 +75,8 @@ function handleAppError(error) {
     } else if (error instanceof ConflictError) {
         alert(`🛑 Conflito: ${error.message}`);
     } else if (error instanceof NotFoundError) {
-        alert(`🔍 Não Encontrado: ${error.message}`);
+        console.error(`🔍 Recurso não encontrado: ${error.message}`);
+        alert(`Erro 404: O sistema não encontrou os dados solicitados. Verifique se o item não foi excluído.`);
     } else if (error instanceof ForbiddenError) {
         alert(`🚫 Acesso Negado: ${error.message}`);
     } else if (error instanceof AuthenticationError) {

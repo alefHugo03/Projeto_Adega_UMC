@@ -1,7 +1,8 @@
-import requisitarDados from '../conection/query.js';
-import { abrirModal } from '../modules/modal.js';
-import { handleAppError } from '../exception/exceptions.js';
+import requisitarDados from '../../conection/query.js';
+import { abrirModal } from '../../modules/modal.js';
+import { handleAppError } from '../../exception/exceptions.js';
 
+// Busca os itens de uma venda e exibe no modal de detalhes.
 export async function verDetalhesVenda(vendaId) {
     try {
         const itens = await requisitarDados(`/api/itemvendas/venda/${vendaId}`, 'GET');
@@ -34,7 +35,7 @@ export async function verDetalhesVenda(vendaId) {
             }
         }
 
-        const modalId = 'modal-detalhes'; // Verifique se este ID existe no seu HTML
+        const modalId = 'modal-detalhes';
         if (document.getElementById(modalId)) {
             abrirModal(modalId);
         } else {

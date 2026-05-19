@@ -62,8 +62,6 @@ public class UsuarioDataLoader implements CommandLineRunner {
             u4.setActive(true);
 
             usuarioRepository.saveAll(List.of(u1, u2, u3, u4));
-
-            System.out.println(">>> UsuarioDataLoader: Usuários Admin, Alef, Richard e Vitor criados.");
         }
     }
 }

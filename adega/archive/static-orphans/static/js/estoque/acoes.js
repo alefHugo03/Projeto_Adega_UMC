@@ -1,6 +1,9 @@
-import requisitarDados from '../conection/query.js';
-import { abrirModal, fecharModal } from '../modules/modal.js';
+import requisitarDados from '../../conection/query.js';
+import { abrirModal, fecharModal } from '../../modules/modal.js';
+import { isAdmin } from '../../usuario/acoes.js';
+import { handleAppError } from '../../exception/exceptions.js';
 
+// Carrega o estoque do backend e renderiza a tabela de estoque na página.
 async function carregarEstoque() {
     try {
         const estoques = await requisitarDados('/api/estoques', 'GET');
@@ -14,6 +17,14 @@ async function carregarEstoque() {
             const statusClass = item.quantidade > 20 ? 'status-ok' : (item.quantidade > 5 ? 'status-warning' : 'status-danger');
             const statusTexto = item.quantidade > 20 ? 'OK' : (item.quantidade > 5 ? 'Baixo' : 'Crítico');
 
+            // Botão de retirada exclusivo para Admin
+            const btnRetirada = isAdmin() 
+                ? `<button class="btn btn-danger btn-table-action" 
+                           onclick="window.prepararRetirada('${item.produto.idProduto}', '${item.produto.nomeProduto}')">
+                        Baixa
+                   </button>` 
+                : '';
+
             tr.innerHTML = `
                 <td>${item.produto.nomeProduto}</td>
                 <td>${item.produto.tipoProduto}</td>
@@ -24,6 +35,7 @@ async function carregarEstoque() {
                             onclick="window.prepararEntradaEstoque('${item.idEstoque}', '${item.produto.idProduto}', '${item.produto.nomeProduto}', ${item.quantidade})">
                         Atualizar
                     </button>
+                    ${btnRetirada}
                 </td>
             `;
             tbody.appendChild(tr);
@@ -33,9 +45,7 @@ async function carregarEstoque() {
     }
 }
 
-/**
- * Prepara o modal para uma nova entrada de um produto que pode ou não estar na lista
- */
+// Prepara o modal para criar uma nova entrada de estoque (reseta formulário e carrega produtos).
 async function iniciarNovaEntrada() {
     document.getElementById('form-estoque').reset();
     document.getElementById('estoque-id').value = '';
@@ -49,11 +59,11 @@ async function iniciarNovaEntrada() {
     abrirModal('modal-estoque');
 }
 
+// Prepara o modal para editar uma entrada de estoque existente (preenche campos).
 function prepararEntradaEstoque(idEstoque, idProduto, nomeProduto, qtdAtual) {
     document.getElementById('estoque-id').value = idEstoque || '';
     document.getElementById('estoque-produto-id').value = idProduto;
     
-    // Para atualização, mostramos apenas o nome (não permite trocar o produto)
     const displayNome = document.getElementById('estoque-produto-nome-fixo');
     displayNome.value = nomeProduto;
     displayNome.style.display = 'block';
@@ -63,6 +73,7 @@ function prepararEntradaEstoque(idEstoque, idProduto, nomeProduto, qtdAtual) {
     abrirModal('modal-estoque');
 }
 
+// Busca produtos do backend e popula o select do modal de entrada.
 async function carregarProdutosNoSelect() {
     const select = document.getElementById('estoque-produto-selecao');
     try {
@@ -74,6 +85,7 @@ async function carregarProdutosNoSelect() {
     } catch (e) { console.error("Erro ao carregar produtos para entrada", e); }
 }
 
+// Envia a entrada de estoque para a API (cria ou atualiza), usando os campos do formulário.
 async function salvarEstoque(event) {
     event.preventDefault();
     const idProdutoFixo = document.getElementById('estoque-produto-id').value;
@@ -87,7 +99,6 @@ async function salvarEstoque(event) {
     };
 
     try {
-        // Chamamos o POST para processar a "Entrada" (soma no backend)
         await requisitarDados('/api/estoques', 'POST', dados);
         alert('Entrada de estoque realizada com sucesso!');
         fecharModal('modal-estoque');
@@ -97,5 +108,33 @@ async function salvarEstoque(event) {
     }
 }
 
+// Fluxo de retirada administrativa (rodado por admin): solicita quantidades/motivo e registra uma venda de baixa.
+window.prepararRetirada = async (idProduto, nome) => {
+    const qtd = prompt(`[RETIRADA ADMINISTRATIVA]\nProduto: ${nome}\n\nInforme a quantidade para retirar do estoque (será registrado como despesa):`);
+    
+    if (!qtd || isNaN(qtd) || parseInt(qtd) <= 0) return;
+
+    const motivo = prompt("Informe o motivo da retirada (Ex: Quebra, Degustação, Brinde):");
+    if (!motivo) return;
+
+    const token = localStorage.getItem('jwt_token');
+    const payload = JSON.parse(atob(token.split('.')[1]));
+
+    const dados = {
+        idUser: payload.id,
+        formaPagamento: 'RETIRADA_ADMIN',
+        valorTotal: 0,
+        itens: [{ idProduto: parseInt(idProduto), quantidade: parseInt(qtd) }],
+        pagamentos: [{ formaPagamento: 'RETIRADA_ADMIN', valorPago: 0, parcelas: 1 }]
+    };
+
+    try {
+        await requisitarDados('/api/vendas', 'POST', dados);
+        alert('Baixa de estoque registrada com sucesso!');
+        await carregarEstoque();
+    } catch (error) {
+        handleAppError(error);
+    }
+};
 
 export { carregarEstoque,iniciarNovaEntrada,prepararEntradaEstoque,carregarProdutosNoSelect,salvarEstoque }

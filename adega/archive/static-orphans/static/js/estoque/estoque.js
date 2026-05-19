@@ -1,8 +1,8 @@
-import logout from '../conection/logout.js';
+import logout from '../../conection/logout.js';
 import { carregarEstoque, prepararReposicao, salvarEstoque } from './acoes.js';
-import { fecharModal, fecharAoClicarFora } from '../modules/modal.js';
+import { fecharModal, fecharAoClicarFora } from '../../modules/modal.js';
 
-// Global exposure
+// Inicializa comportamentos globais do módulo de estoque (eventos e bindings globais)
 window.logout = logout;
 window.prepararReposicao = prepararReposicao;
 window.salvarEstoque = salvarEstoque;
@@ -10,6 +10,6 @@ window.fecharModal = fecharModal;
 
 window.addEventListener('click', fecharAoClicarFora);
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
     carregarEstoque();
 });

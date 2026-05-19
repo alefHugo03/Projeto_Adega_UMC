@@ -7,7 +7,8 @@ public enum FormaPagamento {
     DINHEIRO("Dinheiro"),
     PIX("PIX"),
     CARTAO_DEBITO("Cartão de Débito"),
-    CARTAO_CREDITO("Cartão de Crédito");
+    CARTAO_CREDITO("Cartão de Crédito"),
+    RETIRADA_ADMIN("Retirada do Admin");
 
     private final String descricao;
 

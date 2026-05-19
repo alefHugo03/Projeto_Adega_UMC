@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Página Não Encontrada | Adego Systems</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/error.css}">
+</head>
+<body class="dashboard-body">
+    <div class="error-page-wrapper">
+        <h1 class="error-code">404</h1>
+        <p class="error-description">Oops! A página que você está procurando parece ter evaporado.</p>
+        <a th:href="@{/home}" class="btn btn-primary">Voltar para a Segurança do Início</a>
+        
+        <!-- Mensagem de redirecionamento automático -->
+        <p id="redirect-msg" style="display: none; margin-top: 2rem; color: var(--text-muted); font-style: italic;">
+            Identificamos sua sessão ativa. Redirecionando para o Dashboard em <span id="timer">5</span>s...
+        </p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('jwt_token');
+            
+            if (token) {
+                const msg = document.getElementById('redirect-msg');
+                const timer = document.getElementById('timer');
+                msg.style.display = 'block';
+                
+                let count = 5;
+                const interval = setInterval(() => {
+                    count--;
+                    timer.textContent = count;
+                    if (count <= 0) {
+                        clearInterval(interval);
+                        window.location.href = '/home';
+                    }
+                }, 1000);
+            }
+        });
+    </script>
+</body>
+</html>

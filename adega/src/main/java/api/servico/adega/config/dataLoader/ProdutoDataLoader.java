@@ -62,7 +62,6 @@ public class ProdutoDataLoader implements CommandLineRunner {
             p7.setValorUnitario(new BigDecimal("15.00"));
 
             produtoRepository.saveAll(List.of(p1, p2, p3, p4, p5, p6, p7));
-            System.out.println(">>> ProdutoDataLoader: Produtos de teste carregados.");
         }
     }
 }

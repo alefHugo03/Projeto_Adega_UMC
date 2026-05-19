@@ -72,7 +72,6 @@ public class ItemVendaDataLoader implements CommandLineRunner {
                         pagamentoVendaRepository.save(pg);
                     }
                 }
-                System.out.println(">>> ItemVendaDataLoader: Itens vinculados com produtos e quantidades alternadas.");
             }
         }
     }

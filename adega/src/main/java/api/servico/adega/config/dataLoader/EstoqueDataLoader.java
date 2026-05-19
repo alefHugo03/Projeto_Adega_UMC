@@ -41,7 +41,6 @@ public class EstoqueDataLoader implements CommandLineRunner {
                     
                     estoqueRepository.save(e);
                 }
-                System.out.println(">>> EstoqueDataLoader: Estoque inicial aleatório criado para cada produto.");
             }
         }
     }

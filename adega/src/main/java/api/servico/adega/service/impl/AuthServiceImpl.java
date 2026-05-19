@@ -1,6 +1,5 @@
 package api.servico.adega.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -12,12 +11,13 @@ import api.servico.adega.service.TokenService;
 @Service
 public class AuthServiceImpl implements AuthService {
 
+    private final AuthenticationManager authenticationManager;
+    private final TokenService tokenService;
 
-        @Autowired
-        private AuthenticationManager authenticationManager;
-
-        @Autowired
-        private TokenService tokenService;
+    public AuthServiceImpl(AuthenticationManager authenticationManager, TokenService tokenService) {
+        this.authenticationManager = authenticationManager;
+        this.tokenService = tokenService;
+    }
 
         @Override
         public String login(String email, String senha) {
