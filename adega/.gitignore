@@ -35,3 +35,5 @@ build/
 # Sensitive files (keystore, certificates, secrets)
 keystore.p12
 secrets/
+# Environment file with secrets
+.env
