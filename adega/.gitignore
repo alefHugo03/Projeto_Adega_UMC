@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Sensitive files (keystore, certificates, secrets)
+keystore.p12
+secrets/
