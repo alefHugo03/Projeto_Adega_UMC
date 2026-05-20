@@ -34,22 +34,22 @@ public class ProdutoDataLoader implements CommandLineRunner {
             Produto p2 = new Produto();
             p2.setNomeProduto("Cerveja Heineken 600ml");
             p2.setTipoProduto("Cerveja");
-            p2.setValorUnitario(new BigDecimal("14.50"));
+            p2.setValorUnitario(new BigDecimal("9.50"));
 
             Produto p3 = new Produto();
-            p3.setNomeProduto("Whisky Single Malt");
-            p3.setTipoProduto("Destilado");
-            p3.setValorUnitario(new BigDecimal("280.00"));
+            p3.setNomeProduto("Cerveja Skol Latão");
+            p3.setTipoProduto("Cerveja");
+            p3.setValorUnitario(new BigDecimal("5.50"));
 
             Produto p4 = new Produto();
-            p4.setNomeProduto("Gin Tanqueray");
-            p4.setTipoProduto("Destilado");
-            p4.setValorUnitario(new BigDecimal("120.00"));
+            p4.setNomeProduto("Coca-Cola 2L");
+            p4.setTipoProduto("Refrigerante");
+            p4.setValorUnitario(new BigDecimal("12.00"));
 
             Produto p5 = new Produto();
             p5.setNomeProduto("Batata Pringles Original");
             p5.setTipoProduto("Snack");
-            p5.setValorUnitario(new BigDecimal("18.90"));
+            p5.setValorUnitario(new BigDecimal("14.90"));
 
             Produto p6 = new Produto();
             p6.setNomeProduto("Amendoim Japonês");

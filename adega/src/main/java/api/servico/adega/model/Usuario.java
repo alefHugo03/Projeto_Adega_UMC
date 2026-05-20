@@ -47,6 +47,18 @@ public class Usuario implements UserDetails {
     @Column(name = "is_active")
     private boolean isActive = true;
 
+    public Long getId() {
+        return id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // Retorna a permissão real do usuário (ex: ROLE_ADMIN ou ROLE_USER)

@@ -37,7 +37,7 @@ public class EstoqueDataLoader implements CommandLineRunner {
                     Estoque e = new Estoque();
                     e.setProduto(p);
                     // Quantidade aleatória entre 50 e 150
-                    e.setQuantidade(random.nextInt(101) + 50);
+                    e.setQuantidade(random.nextInt(16) + 5);
                     
                     estoqueRepository.save(e);
                 }

@@ -23,6 +23,7 @@ public class VendaRequestDTO {
     private List<ItemVendaRequestDTO> itens;
 
     private List<PagamentoRequestDTO> pagamentos;
+    private String motivo;
 
     @Getter
     @Setter

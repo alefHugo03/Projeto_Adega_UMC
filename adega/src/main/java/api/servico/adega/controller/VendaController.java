@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -91,6 +92,7 @@ public class VendaController {
      * Atualiza uma venda existente com base no ID e nos dados recebidos.
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<VendaResponseDTO> atualizarVenda(
         @PathVariable Long id, @Valid @RequestBody VendaRequestDTO vendaRequestDTO) {
         return ResponseEntity.ok(vendaService.editarVenda(id, vendaRequestDTO));
@@ -100,6 +102,7 @@ public class VendaController {
      * Exclui uma venda existente pelo ID.
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> excluirVenda(@PathVariable Long id) {
         vendaService.excluirVenda(id);
         return ResponseEntity.noContent().build();

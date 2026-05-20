@@ -23,7 +23,7 @@ public interface VendaRepository extends JpaRepository<Venda, Long>{
     @Override
     boolean existsById(Long id);
 
-    Page<Venda> findByDataVendaBetween(LocalDateTime inicio, LocalDateTime fim, Pageable pageable);
+    Page<Venda> findByDataHoraVendaBetween(LocalDateTime inicio, LocalDateTime fim, Pageable pageable);
 
     Page<Venda> findByUser_Id(Long idUsuario, Pageable pageable);
 

@@ -28,10 +28,13 @@ public class Venda {
     private List<PagamentoVenda> pagamentos = new ArrayList<>();
 
     @Column(name = "data_venda")
-    private LocalDateTime dataVenda;
+    private LocalDateTime dataHoraVenda;
 
     @Column(name = "valor_total")
     private BigDecimal valorTotal;
+
+    @Column(name = "motivo", length = 255)
+    private String motivo;
 
 
     @ManyToOne
