@@ -1,6 +1,5 @@
 package api.servico.adega.exception;
 
-import java.util.Objects;
 import java.time.LocalDateTime;
 
 import org.slf4j.Logger;

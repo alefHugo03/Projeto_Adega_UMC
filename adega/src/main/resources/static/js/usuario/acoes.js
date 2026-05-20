@@ -18,7 +18,6 @@ export const isAdmin = () => {
         // Verifica em 'roles', 'role' ou 'authorities' (padrões comuns do Spring Security)
         const permissoes = payload.roles || payload.role || payload.authorities || [];
         
-        console.log("Permissões detectadas:", permissoes); // Para te ajudar a debugar no console
 
         if (Array.isArray(permissoes)) {
             return permissoes.includes('ROLE_ADMIN') || permissoes.includes('ADMIN');

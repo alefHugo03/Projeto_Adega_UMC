@@ -1,6 +1,7 @@
 import requisitarDados from '../conection/query.js';
 import { abrirModal, fecharModal } from '../modules/modal.js';
 import { handleAppError } from '../exception/exceptions.js';
+import { isAdmin } from '../usuario/acoes.js';
 // import excluir from '../conection/excluir.js'; // Este import não é utilizado e pode ser removido
 
 // Variáveis globais para controle de paginação
@@ -25,12 +26,16 @@ async function verDetalhesVenda(vendaId) {
         const spanId = document.getElementById('detalhe-id-venda');
         const pPagamento = document.getElementById('detalhe-pagamento-venda');
         const pVendedor = document.getElementById('detalhe-vendedor-venda');
+        const pMotivo = document.getElementById('detalhe-motivo-venda');
 
         if (spanId) spanId.innerText = vendaId;
         // Alterado de formaPagamento para resumoPagamento para coincidir com o DTO do Backend
         if (pPagamento) pPagamento.innerText = venda.resumoPagamento || venda.formaPagamento || 'Não especificado';
         // Tenta buscar o nome do usuário/vendedor no objeto retornado
         if (pVendedor) pVendedor.innerText = venda.usuario?.nome || venda.user?.nome || 'N/A';
+        // Mostra motivo apenas quando a venda for uma retirada administrativa
+        const isRetirada = venda.formaPagamento && venda.formaPagamento.toString().toLowerCase().includes('retirada');
+        if (pMotivo) pMotivo.innerText = isRetirada ? (venda.motivo || '') : '';
 
         if (listaItens) {
             listaItens.innerHTML = '';
@@ -67,6 +72,11 @@ async function verDetalhesVenda(vendaId) {
  */
 async function excluirVenda(idVenda) {
     try {
+        if (!isAdmin()) {
+            alert("Acesso negado: Somente administradores podem excluir vendas.");
+            return;
+        }
+
         if (confirm('Tem certeza que deseja excluir esta venda? Esta ação não pode ser desfeita.')) {
             // Assumindo que a exclusão de uma venda deve ser feita no endpoint principal de vendas
             // e que o backend lida com a exclusão em cascata dos itens de venda.
@@ -94,16 +104,23 @@ async function prepararEdicaoVenda(id) {
         const container = document.getElementById('container-pagamentos');
         if (container) container.innerHTML = '';
 
-        // 2. Busca dados da venda, itens e pagamentos simultaneamente
-        const [venda, itens, pagamentos] = await Promise.all([
+        // 2. Busca dados da venda e itens simultaneamente
+        const [venda, itens] = await Promise.all([
             requisitarDados(`/api/vendas/${id}`, 'GET'),
-            requisitarDados(`/api/itemvendas/venda/${id}`, 'GET'),
-            requisitarDados(`/api/pagamentos/venda/${id}`, 'GET').catch(() => []) // Fallback caso não exista a rota
+            requisitarDados(`/api/itemvendas/venda/${id}`, 'GET')
         ]);
+        const pagamentos = venda.pagamentos || []; // Usa os pagamentos que já vêm no objeto da venda
 
         // Validação: Não permitir editar venda cancelada
         if (venda.active === false) {
             alert('🛑 Operação Inválida: Esta venda está cancelada e não pode ser editada.');
+            return;
+        }
+
+        // Impedir edição de retirada administrativa por usuários não-admin
+        const isRetirada = venda.formaPagamento && venda.formaPagamento.toString().toLowerCase().includes('retirada');
+        if (isRetirada && !isAdmin()) {
+            alert('Atenção: Apenas administradores podem editar retiradas administrativas.');
             return;
         }
 
@@ -139,10 +156,20 @@ async function prepararEdicaoVenda(id) {
                 // Passa o objeto de pagamento para a função para preencher os campos
                 adicionarLinhaPagamento(pagamento);
             });
-        } else {
-            // Se não houver pagamentos, adiciona uma linha vazia para começar
+        } else if (!isRetirada) {
+            // Se não houver pagamentos e NÃO for uma retirada administrativa, 
+            // adiciona uma linha vazia para começar (evita campos 'required' escondidos)
             adicionarLinhaPagamento();
         }
+
+        // Preenche motivo se existir e mostra o campo se for retirada administrativa
+        const inputMotivo = document.getElementById('venda-motivo');
+        const grupoMotivo = document.getElementById('grupo-motivo-venda');
+        const grupoPagamentos = document.getElementById('grupo-pagamentos');
+        
+        if (inputMotivo) inputMotivo.value = venda.motivo || '';
+        if (grupoMotivo) grupoMotivo.style.display = isRetirada ? 'block' : 'none';
+        if (grupoPagamentos) grupoPagamentos.style.display = isRetirada ? 'none' : 'block';
         
         // Atualiza o título do modal
         if (document.getElementById('modal-venda-titulo')) {
@@ -172,47 +199,68 @@ async function salvarVenda(event) {
     const id = document.getElementById('venda-id')?.value;
     const produtoId = document.getElementById('venda-produto')?.value;
     const quantidade = document.getElementById('venda-quantidade')?.value;
+    const motivo = document.getElementById('venda-motivo')?.value;
     const paymentRows = document.querySelectorAll('.linha-pagamento');
     
-    if (!produtoId || !quantidade || paymentRows.length === 0) {
+    // Se for retirada admin (tem motivo), não exige pagamentos (será preenchido automaticamente)
+    const isRetiradaAdmin = motivo && motivo.trim().length > 0;
+    
+    if (!produtoId || !quantidade) {
+        alert('Preencha os dados do produto.');
+        return;
+    }
+
+    if (!isRetiradaAdmin && paymentRows.length === 0) {
         alert('Preencha os dados do produto e adicione ao menos um pagamento.');
         return;
     }
 
     const pagamentos = [];
     let totalPago = 0;
+    let contemRetirada = false;
 
-    for (const row of paymentRows) {
-        const forma = row.querySelector('.pag-forma').value;
-        const valor = parseFloat(row.querySelector('.pag-valor').value);
-        const parcelas = parseInt(row.querySelector('.pag-parcelas').value) || 1;
+    // Se for retirada admin, cria pagamento automaticamente
+    if (isRetiradaAdmin) {
+        pagamentos.push({ formaPagamento: 'RETIRADA_ADMIN', valorPago: 0, parcelas: 1 });
+        contemRetirada = true;
+    } else {
+        // Caso contrário, processa as linhas de pagamento da UI
+        for (const row of paymentRows) {
+            const forma = row.querySelector('.pag-forma').value;
+            const valor = parseFloat(row.querySelector('.pag-valor').value);
+            const parcelas = parseInt(row.querySelector('.pag-parcelas').value) || 1;
 
-        if (isNaN(valor) || valor <= 0) {
-            alert('Informe um valor válido para todos os pagamentos.');
+            // Permitir valor zero somente para RETIRADA_ADMIN
+            if (isNaN(valor) || (valor <= 0 && forma !== 'RETIRADA_ADMIN')) {
+                alert('Informe um valor válido para todos os pagamentos.');
+                return;
+            }
+
+            if (forma === 'RETIRADA_ADMIN') contemRetirada = true;
+            
+            pagamentos.push({ formaPagamento: forma, valorPago: valor, parcelas: parcelas }); // Corrigido para 'parcelas' para corresponder ao DTO
+            totalPago += valor;
+        }
+
+        // Garante que há pelo menos um pagamento para extrair a formaPagamento principal
+        if (pagamentos.length === 0) {
+            alert('Adicione ao menos um pagamento.');
             return;
         }
-        
-        pagamentos.push({ formaPagamento: forma, valorPago: valor, parcelas: parcelas }); // Corrigido para 'parcelas' para corresponder ao DTO
-        totalPago += valor;
-    }
 
-    // Garante que há pelo menos um pagamento para extrair a formaPagamento principal
-    if (pagamentos.length === 0) {
-        alert('Adicione ao menos um pagamento.');
-        return;
-    }
-
-    const totalEsperado = extrairPrecoDoSelect() * parseInt(quantidade);
-    if (Math.abs(totalPago - totalEsperado) > 0.01) {
-        alert(`A soma dos pagamentos (R$ ${totalPago.toFixed(2)}) não confere com o total da venda (R$ ${totalEsperado.toFixed(2)}).`);
-        return;
+        const totalEsperado = extrairPrecoDoSelect() * parseInt(quantidade);
+        if (!contemRetirada && Math.abs(totalPago - totalEsperado) > 0.01) {
+            alert(`A soma dos pagamentos (R$ ${totalPago.toFixed(2)}) não confere com o total da venda (R$ ${totalEsperado.toFixed(2)}).`);
+            return;
+        }
     }
 
     const dados = {
         idUser: parseInt(usuarioId), // Corrigido para 'idUser' para corresponder ao DTO do backend
         formaPagamento: pagamentos[0].formaPagamento,
         dataVenda: new Date().toISOString(),
-        valorTotal: totalPago,
+        valorTotal: isRetiradaAdmin ? 0 : totalPago,
+        motivo: motivo || null,
         itens: [{ idProduto: parseInt(produtoId), quantidade: parseInt(quantidade) }],
         pagamentos: pagamentos
     };
@@ -265,14 +313,20 @@ function adicionarLinhaPagamento(pagamento = null) { // Aceita um objeto de paga
 
     const div = document.createElement('div');
     div.className = 'linha-pagamento mb-2 d-flex gap-1 align-items-center';
+    
+    // Determina se este pagamento é RETIRADA_ADMIN (para novo ou para preenchimento)
+    const isRetiradaAdmin = pagamento && pagamento.formaPagamento === 'RETIRADA_ADMIN';
+    const requiredAttr = isRetiradaAdmin ? '' : 'required';
+    
     div.innerHTML = `
-        <select class="pag-forma" onchange="window.toggleParcelas(this)" required>
+        <select class="pag-forma" onchange="window.atualizarRequisitoValor(this); window.toggleParcelas(this)" required>
             <option value="DINHEIRO">Dinheiro</option>
             <option value="PIX">Pix</option>
             <option value="CARTAO_DEBITO">Débito</option>
             <option value="CARTAO_CREDITO">Crédito</option>
+            <option value="RETIRADA_ADMIN">Retirada Admin</option>
         </select>
-        <input type="number" class="pag-valor" placeholder="Valor R$" step="0.01" required style="flex: 1;" oninput="window.atualizarTotalPago()">
+        <input type="number" class="pag-valor" name="valorPago" placeholder="Valor R$" step="0.01" ${requiredAttr} style="flex: 1;" oninput="window.atualizarTotalPago()">
         <select class="pag-parcelas" style="display: none;">
             <option value="1">1x</option>
             <option value="2">2x</option>
@@ -290,7 +344,13 @@ function adicionarLinhaPagamento(pagamento = null) { // Aceita um objeto de paga
         const selectParcelas = div.querySelector('.pag-parcelas');
 
         if (selectForma) selectForma.value = pagamento.formaPagamento || 'DINHEIRO';
-        if (inputValor) inputValor.value = pagamento.valorPago || '';
+        if (inputValor) {
+            inputValor.value = pagamento.valorPago || '';
+            // Remove required para RETIRADA_ADMIN após preencher
+            if (isRetiradaAdmin) {
+                inputValor.removeAttribute('required');
+            }
+        }
         if (selectParcelas) selectParcelas.value = pagamento.parcelas || '1';
         window.toggleParcelas(selectForma); // Garante que o select de parcelas é exibido/ocultado corretamente
     }
@@ -304,6 +364,21 @@ function toggleParcelas(select) {
     const selectParcelas = row.querySelector('.pag-parcelas');
     selectParcelas.style.display = select.value === 'CARTAO_CREDITO' ? 'block' : 'none';
     if (select.value !== 'CARTAO_CREDITO') selectParcelas.value = "1";
+}
+
+/**
+ * Atualiza se o campo de valor é obrigatório conforme a forma de pagamento
+ */
+function atualizarRequisitoValor(selectForma) {
+    const row = selectForma.parentElement;
+    const inputValor = row.querySelector('.pag-valor');
+    
+    if (selectForma.value === 'RETIRADA_ADMIN') {
+        inputValor.removeAttribute('required');
+        inputValor.value = inputValor.value || '0'; // Define para 0 se vazio
+    } else {
+        inputValor.setAttribute('required', 'required');
+    }
 }
 
 /**
@@ -379,6 +454,11 @@ async function iniciarNovaVenda() { // Make it async
     adicionarLinhaPagamento(); // Inicia com uma linha de pagamento padrão
     atualizarResumoTotal();
     atualizarTotalPago();
+    // Esconde campo motivo e mostra pagamentos para vendas normais
+    const grupoMotivo = document.getElementById('grupo-motivo-venda');
+    const grupoPagamentos = document.getElementById('grupo-pagamentos');
+    if (grupoMotivo) grupoMotivo.style.display = 'none';
+    if (grupoPagamentos) grupoPagamentos.style.display = 'block';
     abrirModal('modal-venda');
 }
 

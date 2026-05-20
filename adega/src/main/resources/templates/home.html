@@ -26,33 +26,11 @@
                 </div>
             </header>
 
-            <div class="dashboard-grid">
-                <section class="card chart-card grid-col-span-2">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h3 id="chart-title">Selecione um Gráfico</h3>
-                        <select id="chart-selector" class="form-control" style="width: auto;">
-                            <option value="vendasTempo">Evolução de Vendas (Últimos 7 dias)</option>
-                            <option value="estoque">Estoque por Produto</option>
-                            <option value="vendedor">Vendas por Vendedor (R$)</option>
-                            <option value="categoria">Distribuição por Categoria</option>
-                            <option value="pagamento">Formas de Pagamento</option>
-                        </select>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="mainChart"></canvas>
-                    </div>
-                    <p id="chart-description" class="text-muted mt-3" style="font-size: 0.9rem; font-style: italic;">
-                        Selecione um gráfico acima para ver os detalhes.
-                    </p>
-                </section>
-            </div>
-
-            <!-- Seção de Estatísticas Rápidas -->
-            <div class="stats-container mt-4">
+            <div class="stats-panel mt-4">
                 <section class="card stats-card">
                     <div class="stats-icon-wrapper"><i class="fas fa-exclamation-triangle"></i></div>
                     <div class="stats-info-wrapper">
-                        <h4 class="stats-label">Estoque Crítico</h4>
+                        <h4 class="stats-label">Status Estoque</h4>
                         <div id="stats-estoque-critico" class="stats-value-list">
                             <!-- Injetado via JS -->
                         </div>
@@ -85,17 +63,78 @@
                         <small class="text-muted">Valor total em produtos</small>
                     </div>
                 </section>
+
+                <section class="card stats-card">
+                    <div class="stats-icon-wrapper"><i class="fas fa-users"></i></div>
+                    <div class="stats-info-wrapper">
+                        <h4 class="stats-label">Média de Atendimentos</h4>
+                        <p id="stats-media-atendimentos" class="stats-value-highlight">0 / dia</p>
+                        <small class="text-muted">Base: Semana atual</small>
+                    </div>
+                </section>
+            </div>
+
+            <div class="dashboard-grid mt-4">
+                <!-- Bloco Semanal -->
+                <section class="card chart-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3>Visão Semanal</h3>
+                        <select id="selector-semanal" class="form-control" style="width: auto; padding: 2px 10px;">
+                            <option value="vendasTempo" selected>Evolução</option>
+                            <option value="pagamento">Pagamentos</option>
+                            <option value="vendedor">Vendedores</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chartSemanal"></canvas>
+                    </div>
+                </section>
+
+                <!-- Bloco Mensal -->
+                <section class="card chart-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3>Visão Mensal</h3>
+                        <select id="selector-mensal" class="form-control" style="width: auto; padding: 2px 10px;">
+                            <option value="vendasMensal" selected>Evolução</option>
+                            <option value="categoria">Categorias</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chartMensal"></canvas>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Estoque Atual (Geral) -->
+            <section class="card chart-card mt-4">
+                <h3>Estoque por Produto (Top 10)</h3>
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="chartEstoque"></canvas>
+                </div>
+            </section>
+
+            <div class="insights-grid mt-4">
+                <section class="card insight-card">
+                    <h3>Top 5 Produtos em Estoque</h3>
+                    <ul id="top-produtos-list" class="quick-list"></ul>
+                </section>
+                <section class="card insight-card">
+                    <h3>Últimas 5 Vendas</h3>
+                    <ul id="ultimas-vendas-list" class="quick-list"></ul>
+                </section>
             </div>
         </main>
     </div>
     <script type="module" th:src="@{/js/home/home.js}"></script>
     <script type="module">
-        import { loadSidebar } from '../js/modules/sidebar.js';
-        import logout from '../js/conection/logout.js';
+        import { loadSidebar } from '/js/modules/sidebar.js';
+        import logout from '/js/conection/logout.js';
 
         window.logout = logout;
         // Carrega a sidebar e ajusta a visibilidade do menu de usuários
-        document.addEventListener('DOMContentLoaded', loadSidebar);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSidebar();
+        });
     </script>
 </body>
 </html>

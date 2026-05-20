@@ -4,6 +4,9 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
+import java.nio.charset.StandardCharsets;
+
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -21,10 +24,17 @@ public class TokenServiceImpl implements TokenService {
     @Value("${api.security.token.secret:minhasenhamuitosecreta123}")
     private String secret;
 
+    @PostConstruct
+    public void validarConfiguracao() {
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException("JWT secret is not configured. Set api.security.token.secret or API_SECURITY_TOKEN_SECRET with a non-empty value.");
+        }
+    }
+
     @Override
     public String gerarToken(Usuario usuario) {
         try {
-            var algoritmo = Algorithm.HMAC256(secret);
+            var algoritmo = Algorithm.HMAC256(secret.getBytes(StandardCharsets.UTF_8));
             return JWT.create()
                     .withIssuer("Minha_API")
                     .withSubject(usuario.getEmail())
@@ -40,7 +50,7 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public String validarToken(String token) {
         try {
-            var algoritmo = Algorithm.HMAC256(secret);
+            var algoritmo = Algorithm.HMAC256(secret.getBytes(StandardCharsets.UTF_8));
             return JWT.require(algoritmo)
                     .withIssuer("Minha_API")
                     .build()

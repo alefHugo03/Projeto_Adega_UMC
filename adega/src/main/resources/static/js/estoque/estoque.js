@@ -1,10 +1,11 @@
 import logout from '../../conection/logout.js';
-import { carregarEstoque, prepararReposicao, salvarEstoque } from './acoes.js';
+import { carregarEstoque, iniciarNovaEntrada, prepararEntradaEstoque, salvarEstoque } from './acoes.js';
 import { fecharModal, fecharAoClicarFora } from '../../modules/modal.js';
 
 // Inicializa comportamentos globais do módulo de estoque (eventos e bindings globais)
 window.logout = logout;
-window.prepararReposicao = prepararReposicao;
+window.iniciarNovaEntrada = iniciarNovaEntrada;
+window.prepararEntradaEstoque = prepararEntradaEstoque;
 window.salvarEstoque = salvarEstoque;
 window.fecharModal = fecharModal;
 

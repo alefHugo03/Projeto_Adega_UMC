@@ -1,4 +1,4 @@
-import requisitarDados from '../../conection/query.js';
+import requisitarDados from '../conection/query.js';
 
 // Carrega e renderiza uma listagem alternativa do estoque
 async function carregarEstoque() {
@@ -15,7 +15,7 @@ async function carregarEstoque() {
                 if (item.quantidade <= 0) {
                     statusClass = 'status-danger';
                     statusText = 'Esgotado';
-                } else if (item.quantidade < 10) {
+                } else if (item.quantidade < 5) {
                     statusClass = 'status-warning';
                     statusText = 'Baixo';
                 }

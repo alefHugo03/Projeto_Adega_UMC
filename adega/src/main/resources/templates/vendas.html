@@ -100,6 +100,11 @@
                     <input type="number" id="venda-quantidade" min="1" value="1" required oninput="atualizarResumoTotal()">
                 </div>
 
+                <div class="form-group mb-2" id="grupo-motivo-venda" style="display: none;">
+                    <label for="venda-motivo">Motivo (retirada administrativa):</label>
+                    <input type="text" id="venda-motivo" class="form-control" placeholder="Motivo da retirada (ex: Quebra)">
+                </div>
+
                 <div class="resumo-valores mb-3 p-2">
                     <div class="d-flex justify-content-between align-items-center">
                         <strong>Total da Venda:</strong>
@@ -112,13 +117,15 @@
                 </div>
 
                 <hr class="mb-3">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h3 class="modal-subheader">Pagamentos</h3>
-                    <button type="button" class="btn btn-info btn-table-action" onclick="adicionarLinhaPagamento()">+ Forma de Pagamento</button>
-                </div>
-                
-                <div id="container-pagamentos" class="mb-3">
-                    <!-- Linhas de pagamento inseridas dinamicamente pelo JS -->
+                <div id="grupo-pagamentos" class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h3 class="modal-subheader">Pagamentos</h3>
+                        <button type="button" class="btn btn-info btn-table-action" onclick="adicionarLinhaPagamento()">+ Forma de Pagamento</button>
+                    </div>
+                    
+                    <div id="container-pagamentos" class="mb-3">
+                        <!-- Linhas de pagamento inseridas dinamicamente pelo JS -->
+                    </div>
                 </div>
 
                 <div class="d-flex justify-content-end gap-2 mt-4">
@@ -143,6 +150,9 @@
                 </div>
                 <div class="mt-1">
                     <strong>Pagamento:</strong> <span id="detalhe-pagamento-venda" style="color: var(--primary-color); font-weight: bold;"></span>
+                </div>
+                <div class="mt-1">
+                    <strong>Motivo:</strong> <span id="detalhe-motivo-venda" style="color: var(--secondary-color);"></span>
                 </div>
             </div>
 

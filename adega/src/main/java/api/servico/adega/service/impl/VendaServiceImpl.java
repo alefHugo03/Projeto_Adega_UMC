@@ -32,6 +32,8 @@ import api.servico.adega.repository.ProdutoRepository;
 import api.servico.adega.repository.UsuarioRepository;
 import api.servico.adega.repository.VendaRepository;
 import api.servico.adega.service.VendaService;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @Service
 @Transactional(readOnly = true)
@@ -80,7 +82,7 @@ public class VendaServiceImpl implements VendaService {
         LocalDate dataConvertida = LocalDate.parse(data);
         LocalDateTime inicio = dataConvertida.atStartOfDay();
         LocalDateTime fim = dataConvertida.atTime(23, 59, 59, 999_999_999);
-        Page<Venda> vendas = vendaRepository.findByDataVendaBetween(inicio, fim, pageable);
+        Page<Venda> vendas = vendaRepository.findByDataHoraVendaBetween(inicio, fim, pageable);
 
         if (vendas.isEmpty()) {
             throw new ResourceNotFoundException("Venda", "data", data);
@@ -125,14 +127,16 @@ public class VendaServiceImpl implements VendaService {
         // Define a data: usa a informada ou a atual do servidor
         if (vendaRequestDTO.getDataVenda() != null && !vendaRequestDTO.getDataVenda().isBlank()) {
             // OffsetDateTime lida com o formato ISO do JS (com 'Z' no final)
-            venda.setDataVenda(OffsetDateTime.parse(vendaRequestDTO.getDataVenda()).toLocalDateTime());
+            venda.setDataHoraVenda(OffsetDateTime.parse(vendaRequestDTO.getDataVenda()).toLocalDateTime());
         } else {
-            venda.setDataVenda(LocalDateTime.now());
+            venda.setDataHoraVenda(LocalDateTime.now());
         }
 
         venda.setUser(usuario);
         venda.setActive(true);
         venda.setValorTotal(BigDecimal.ZERO);
+        // Atribui motivo caso enviado (ex: retirada administrativa)
+        venda.setMotivo(vendaRequestDTO.getMotivo());
         
         // SALVAR A VENDA PRIMEIRO: Necessário para gerar o ID que será usado nos itens e pagamentos
         venda = vendaRepository.save(venda);
@@ -169,6 +173,10 @@ public class VendaServiceImpl implements VendaService {
                 valorTotalCalculado = valorTotalCalculado.add(preco.multiply(quantidade));
             }
         }
+        // Se for uma retirada administrativa, considerar a venda como isenta (valor zero)
+        if (vendaRequestDTO.getFormaPagamento() != null && "RETIRADA_ADMIN".equalsIgnoreCase(vendaRequestDTO.getFormaPagamento())) {
+            valorTotalCalculado = BigDecimal.ZERO;
+        }
 
         // --- PROCESSAMENTO DE PAGAMENTOS ---
         processarPagamentosVenda(venda, vendaRequestDTO.getPagamentos(), valorTotalCalculado);
@@ -187,6 +195,18 @@ public class VendaServiceImpl implements VendaService {
             throw new ResourceNotFoundException("Venda", "id", id);
         }
 
+        // Impede edição de retiradas administrativas por usuários sem ROLE_ADMIN
+        boolean retiradaExistente = vendaExistente.getPagamentos().stream()
+                .anyMatch(p -> FormaPagamento.RETIRADA_ADMIN.equals(p.getFormaPagamento()));
+        if (retiradaExistente) {
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            boolean isAdmin = auth != null && auth.getAuthorities().stream()
+                    .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+            if (!isAdmin) {
+                throw new BadRequestException("Apenas administradores podem editar retiradas administrativas.");
+            }
+        }
+
         // 1. REVERTER ESTOQUE DOS ITENS ANTIGOS E REMOVER ITENS/PAGAMENTOS ANTIGOS
         List<ItemVenda> itensAntigos = itemVendaRepository.findByVenda_IdVenda(id);
         for (ItemVenda itemAntigo : itensAntigos) {
@@ -202,7 +222,7 @@ public class VendaServiceImpl implements VendaService {
         // 2. ATUALIZAR DADOS DA VENDA (HEADER)
         if (vendaRequestDTO.getDataVenda() != null && !vendaRequestDTO.getDataVenda().isBlank()) {
             // Ajustado para OffsetDateTime para suportar o formato ISO com timezone (Z) enviado pelo JS
-            vendaExistente.setDataVenda(OffsetDateTime.parse(vendaRequestDTO.getDataVenda()).toLocalDateTime());
+            vendaExistente.setDataHoraVenda(OffsetDateTime.parse(vendaRequestDTO.getDataVenda()).toLocalDateTime());
         } else {
             // Se a data não for fornecida no DTO, mantém a data original da venda
             // ou define como a data atual, dependendo da regra de negócio.
@@ -251,6 +271,14 @@ public class VendaServiceImpl implements VendaService {
         }
 
         // 4. PROCESSAR NOVOS PAGAMENTOS
+        // Atribui motivo caso enviado (ex: retirada administrativa)
+        vendaExistente.setMotivo(vendaRequestDTO.getMotivo());
+
+        // Se for uma retirada administrativa, considerar a venda como isenta (valor zero)
+        if (vendaRequestDTO.getFormaPagamento() != null && "RETIRADA_ADMIN".equalsIgnoreCase(vendaRequestDTO.getFormaPagamento())) {
+            valorTotalCalculado = BigDecimal.ZERO;
+        }
+
         processarPagamentosVenda(vendaExistente, vendaRequestDTO.getPagamentos(), valorTotalCalculado);
         vendaExistente.setValorTotal(valorTotalCalculado); // Atualiza o valor total calculado para refletir na edição
 
@@ -260,6 +288,7 @@ public class VendaServiceImpl implements VendaService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')") // Apenas usuários com a role ADMIN podem excluir vendas
     public void excluirVenda(Long id){
         Venda venda = this.vendaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Venda", "id", id));
@@ -273,6 +302,7 @@ public class VendaServiceImpl implements VendaService {
      */
     private void processarPagamentosVenda(Venda venda, List<PagamentoRequestDTO> pagamentosDTO, BigDecimal valorTotalCalculado) {
         BigDecimal totalPago = BigDecimal.ZERO;
+        boolean isRetiradaAdmin = false;
         
         // Garante que a lista de pagamentos na entidade não seja nula
         if (venda.getPagamentos() == null) {
@@ -292,19 +322,41 @@ public class VendaServiceImpl implements VendaService {
                     throw new BadRequestException("O parcelamento no cartão de crédito é permitido em até 4x.");
                 }
 
+                BigDecimal valorPagoDTO = pagDTO.getValorPago();
+                if (valorPagoDTO == null) {
+                    throw new BadRequestException("O valor pago é obrigatório");
+                }
+                if (valorPagoDTO.compareTo(BigDecimal.ZERO) < 0) {
+                    throw new BadRequestException("O valor pago não pode ser negativo");
+                }
+
+                if (FormaPagamento.RETIRADA_ADMIN.equals(tipo)) {
+                    // Permite valor zero para retirada administrativa
+                    isRetiradaAdmin = true;
+                } else {
+                    // Para formas normais, exige valor maior que zero
+                    if (valorPagoDTO.compareTo(BigDecimal.ZERO) == 0) {
+                        throw new BadRequestException("O valor pago deve ser maior que zero para a forma de pagamento informada.");
+                    }
+                }
+
                 PagamentoVenda pag = new PagamentoVenda();
                 pag.setVenda(venda);
                 pag.setFormaPagamento(tipo);
-                pag.setValorPago(pagDTO.getValorPago());
+                pag.setValorPago(valorPagoDTO);
                 pag.setParcelas(pagDTO.getParcelas());
                 
                 venda.getPagamentos().add(pag); // Adiciona à lista para garantir integridade via cascade
                 pagamentoVendaRepository.save(pag);
-                totalPago = totalPago.add(pagDTO.getValorPago());
+                totalPago = totalPago.add(valorPagoDTO);
             }
         }
-        if (totalPago.compareTo(valorTotalCalculado) != 0) {
-            throw new BadRequestException("A soma dos pagamentos (" + totalPago + ") deve ser igual ao total da venda (" + valorTotalCalculado + ")");
+        // Para retiradas administrativas, permitimos que a venda seja registrada como isenta (sem necessidade
+        // de correspondência entre totalPago e valorTotalCalculado).
+        if (!isRetiradaAdmin) {
+            if (totalPago.compareTo(valorTotalCalculado) != 0) {
+                throw new BadRequestException("A soma dos pagamentos (" + totalPago + ") deve ser igual ao total da venda (" + valorTotalCalculado + ")");
+            }
         }
     }
 
@@ -318,18 +370,19 @@ public class VendaServiceImpl implements VendaService {
                 .collect(Collectors.joining(", "));
 
         return new VendaResponseDTO(
-                venda.getIdVenda(),
-                resumoPagamento,
-                venda.getDataVenda(),
-                venda.getValorTotal(),
-                venda.isActive(),
-                new UsuarioResponseDTO(
-                    venda.getUser().getId(), 
-                    venda.getUser().getNome(), 
-                    venda.getUser().getEmail(), 
-                    venda.getUser().getRole(),
-                    venda.getUser().isActive()
-                )
+            venda.getIdVenda(),
+            resumoPagamento,
+            venda.getDataHoraVenda(),
+            venda.getValorTotal(),
+            venda.isActive(),
+            new UsuarioResponseDTO(
+                venda.getUser().getId(), 
+                venda.getUser().getNome(), 
+                venda.getUser().getEmail(), 
+                venda.getUser().getRole(),
+                venda.getUser().isActive()
+            ),
+            venda.getMotivo()
         );
 
     }

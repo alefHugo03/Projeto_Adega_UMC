@@ -6,10 +6,17 @@ import { handleAppError } from '../../exception/exceptions.js';
 export async function verDetalhesVenda(vendaId) {
     try {
         const itens = await requisitarDados(`/api/itemvendas/venda/${vendaId}`, 'GET');
+        const venda = await requisitarDados(`/api/vendas/${vendaId}`, 'GET');
         const listaItens = document.getElementById('lista-itens-venda');
         const spanId = document.getElementById('detalhe-id-venda');
+        const pPagamento = document.getElementById('detalhe-pagamento-venda');
+        const pVendedor = document.getElementById('detalhe-vendedor-venda');
+        const pMotivo = document.getElementById('detalhe-motivo-venda');
 
         if (spanId) spanId.innerText = vendaId;
+        if (pPagamento && venda) pPagamento.innerText = venda.formaPagamento || '';
+        if (pVendedor && venda && venda.user) pVendedor.innerText = venda.user.nome || '';
+        if (pMotivo && venda) pMotivo.innerText = venda.motivo || '';
         if (listaItens) {
             listaItens.innerHTML = '';
             if (itens && itens.length > 0) {

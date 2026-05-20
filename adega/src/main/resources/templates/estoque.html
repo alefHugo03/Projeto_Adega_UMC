@@ -12,7 +12,7 @@
         <!-- Sidebar injetada via JS -->
         <div id="sidebar-container"></div>
 
-        <!-- Pagina principal do site-->>
+        <!-- Pagina principal do site -->
         <main class="main-content">
             <header class="content-header">
                 <div class="header-info">
@@ -74,10 +74,10 @@
     </div>
 
     <script type="module">
-        import { carregarEstoque, prepararEntradaEstoque, salvarEstoque, iniciarNovaEntrada } from '../js/estoque/acoes.js';
-        import { fecharModal, fecharAoClicarFora } from '../js/modules/modal.js';
-        import { loadSidebar } from '../js/modules/sidebar.js';
-        import logout from '../js/conection/logout.js';
+        import { carregarEstoque, prepararEntradaEstoque, salvarEstoque, iniciarNovaEntrada } from '/js/estoque/acoes.js';
+        import { fecharModal, fecharAoClicarFora } from '/js/modules/modal.js';
+        import { loadSidebar } from '/js/modules/sidebar.js';
+        import logout from '/js/conection/logout.js';
 
         window.carregarEstoque = carregarEstoque;
         window.prepararEntradaEstoque = prepararEntradaEstoque;
