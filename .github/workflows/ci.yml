@@ -40,6 +40,13 @@ jobs:
           path: |
             **/target/surefire-reports
 
+      - name: Upload JaCoCo Unit Test Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-unit-report
+          path: adega/target/site/jacoco/
+
   integration:
     name: Integration Tests (MySQL)
     needs: build
@@ -103,3 +110,10 @@ jobs:
           path: |
             **/target/surefire-reports
             **/target/failsafe-reports
+
+      - name: Upload JaCoCo Integration Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-integration-report
+          path: adega/target/site/jacoco/
