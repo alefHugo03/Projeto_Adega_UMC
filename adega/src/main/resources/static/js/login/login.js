@@ -39,11 +39,11 @@ async function realizarLogin(email, senha) {
         if (response.ok) {
             const data = await response.json();
             
-            // Armazena no localStorage (para o query.js) e no Cookie (para o Spring Security bloquear páginas)
-            localStorage.setItem('jwt_token', data.token);
-            document.cookie = `jwt_token=${data.token}; path=/; SameSite=Strict`;
             
-            // Redireciona para a página home após o sucesso
+            localStorage.setItem('jwt_token', data.token);
+            
+            document.cookie = `jwt_token=${data.token}; path=/; SameSite=Strict; max-age=60`;
+
             window.location.href = '/home'; 
         } else {
             let corpoErro = null;

@@ -11,16 +11,20 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
@@ -33,17 +37,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(ResourceNotFoundException.class)
     public Object handleResourceNotFoundException(
-            ResourceNotFoundException ex, HttpServletRequest request) {
-        
-        // Se a requisição vier de um navegador (HTML), redireciona. Caso contrário, retorna JSON.
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("text/html")) {
-            return "error/404"; // Renderiza a página HTML de erro
-        }
-
+            ResourceNotFoundException ex,
+            HttpServletRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.NOT_FOUND.value(), ex.getMessage(), LocalDateTime.now(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler({BadCredentialsException.class, AuthenticationException.class})
+    public ResponseEntity<Map<String, String>> handleAuthenticationError(Exception ex) {
+        Map<String, String> response = new HashMap<>();
+        // Mensagem personalizada que o seu login.js irá capturar
+        response.put("message", "E-mail ou senha incorretos. Por favor, verifique seus dados e tente novamente.");
+        response.put("error", "Unauthorized");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
     /**

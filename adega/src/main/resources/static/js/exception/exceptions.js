@@ -28,7 +28,7 @@ class AuthenticationError extends AppError {
 
 /** Erro específico para Login - E-mail ou Senha incorretos */
 class InvalidCredentialsError extends AuthenticationError {
-    constructor(message = 'E-mail ou senha incorretos. Por favor, verifique seus dados.', details = null) {
+    constructor(message = 'E-mail ou senha inválidos. Verifique suas credenciais.', details = null) {
         super(message, details);
     }
 }
@@ -80,8 +80,13 @@ function handleAppError(error) {
     } else if (error instanceof ForbiddenError) {
         alert(`🚫 Acesso Negado: ${error.message}`);
     } else if (error instanceof AuthenticationError) {
-        // Geralmente o query.js já redireciona, mas o alerta confirma o motivo
         alert(`🔑 Sessão Expirada: ${error.message}`);
+        // Limpa o token e redireciona para a página de login
+        localStorage.removeItem('jwt_token');
+        // Também remove o cookie, definindo sua expiração para o passado
+        document.cookie = 'jwt_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+        // Recarrega a página, que deve levar ao login
+        window.location.href = '/'; 
     } else if (error instanceof InternalServerError) {
         alert(`💥 Erro no Servidor: ${error.message}`);
     } else if (error instanceof AppError) {
