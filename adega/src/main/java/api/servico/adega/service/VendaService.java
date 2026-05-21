@@ -9,7 +9,9 @@ import api.servico.adega.dto.requests.VendaRequestDTO;
 import api.servico.adega.dto.responses.VendaResponseDTO;
 
 
-
+/**
+ * Interface para criação do Service de Venda
+ */
 public interface VendaService {
     
 

@@ -19,13 +19,19 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfigurations {
-
+/*
+    Construtor
+ */
     private final SecurityFilter securityFilter;
 
     public SecurityConfigurations(SecurityFilter securityFilter) {
         this.securityFilter = securityFilter;
     }
 
+    /*
+        Criação para forçar quem não tiver o token
+        fazer o login
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(csrf -> csrf.disable())
@@ -35,9 +41,6 @@ public class SecurityConfigurations {
                     req.requestMatchers(HttpMethod.POST, "/auth/login").permitAll();
                     req.requestMatchers(HttpMethod.GET, "/login", "/css/**", "/js/**", "/img/**").permitAll();
                     req.requestMatchers(HttpMethod.DELETE, "/api/**").authenticated();
-
-                    // Exemplo: Permitir criação de usuário se necessário (cadastro público)
-                    // req.requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll();
                     
                     // Qualquer outra requisição deve estar autenticada
                     req.anyRequest().authenticated();

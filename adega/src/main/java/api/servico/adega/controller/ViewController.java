@@ -28,21 +28,21 @@ public class ViewController implements ErrorController {
 
     @GetMapping("/produtos")
     public String produtos() {
-        return "produtos"; // Procura por src/main/resources/templates/produtos.html
+        return "produtos";
     }
 
     @GetMapping("/estoque")
     public String estoque() {
-        return "estoque"; // Procura por src/main/resources/templates/estoque.html
+        return "estoque";
     }
 
     @GetMapping("/vendas")
     public String vendas() {
-        return "vendas"; // Procura por src/main/resources/templates/vendas.html
+        return "vendas";
     }
     @GetMapping("/usuarios")
     public String usuarios() {
-        return "usuarios"; // Procura por src/main/resources/templates/usuarios.html
+        return "usuarios";
     }
 
     @GetMapping("/error/404")
@@ -62,7 +62,7 @@ public class ViewController implements ErrorController {
             Integer statusCode = Integer.valueOf(status.toString());
 
             if (statusCode == HttpStatus.NOT_FOUND.value()) {
-                return "error/404"; // Retorna o template diretamente
+                return "error/404";
             }
         }
         return "error"; 

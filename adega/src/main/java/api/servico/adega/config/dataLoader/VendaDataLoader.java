@@ -24,7 +24,9 @@ import api.servico.adega.repository.VendaRepository;
 @Component
 @Order(4)
 public class VendaDataLoader implements CommandLineRunner {
-
+/*
+ *  Criação dos Construtores
+*/
     private final VendaRepository vendaRepository;
     private final UsuarioRepository usuarioRepository;
     private final PagamentoVendaRepository pagamentoVendaRepository;
@@ -34,7 +36,10 @@ public class VendaDataLoader implements CommandLineRunner {
         this.usuarioRepository = usuarioRepository;
         this.pagamentoVendaRepository = pagamentoVendaRepository;
     }
-
+    /*
+     *  Criação das Vendas para uma base de dados de três a quatro meses
+     *  caso não tenha nada no banco de dados
+     */
     @Override
     public void run(String... args) throws Exception {
         if (vendaRepository.count() == 0) {

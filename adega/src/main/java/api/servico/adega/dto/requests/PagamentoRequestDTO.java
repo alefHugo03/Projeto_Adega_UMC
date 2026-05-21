@@ -8,6 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/*
+    Criando a Requisição para Pagamento
+*/
 @Getter
 @Setter
 @AllArgsConstructor

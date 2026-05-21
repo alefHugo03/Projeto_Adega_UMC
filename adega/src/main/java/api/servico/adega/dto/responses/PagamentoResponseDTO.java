@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/*
+    Criando a Resposta do Pagamento
+*/
 @Getter
 @Setter
 @AllArgsConstructor

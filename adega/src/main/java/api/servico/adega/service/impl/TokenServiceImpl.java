@@ -18,6 +18,10 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import api.servico.adega.model.Usuario;
 import api.servico.adega.service.TokenService;
 
+/**
+ * Classe com as regras de funcionalidade do Service
+ * e regras de negócio dos Tokens
+ */
 @Service
 public class TokenServiceImpl implements TokenService {
 

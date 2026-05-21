@@ -4,6 +4,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/*
+ *  Configuração do que é aceito e quais IPs ele aceita e se comunica
+ */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 

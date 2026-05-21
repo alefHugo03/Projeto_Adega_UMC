@@ -5,6 +5,9 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
+/*
+    Criando a Requisição do Usuário
+*/
 @Getter
 @Setter
 public class UsuarioRequestDTO {

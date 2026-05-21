@@ -5,6 +5,9 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
+/*
+    Criando a Requisição para fazer Login
+*/
 @Getter
 @Setter
 public class LoginRequestDTO {

@@ -4,6 +4,9 @@ import java.util.List;
 
 import api.servico.adega.dto.responses.EstoqueResponseDTO;
 
+/**
+ * Interface para criação do Service de Estoque
+ */
 public interface EstoqueService {
 
     List<EstoqueResponseDTO> buscarEstoque(Long id);

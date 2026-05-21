@@ -29,15 +29,15 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/vendas")
 public class VendaController {
-
-    private final VendaService vendaService;
-
     /**
-     * Injeção do service que encapsula a lógica de negócios.
+     * Construtor
      */
     public VendaController(VendaService vendaService) {
         this.vendaService = vendaService;
     }
+
+
+    private final VendaService vendaService;
 
     /**
      * Lista todas as vendas.

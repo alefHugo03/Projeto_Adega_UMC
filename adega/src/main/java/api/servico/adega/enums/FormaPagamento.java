@@ -2,6 +2,9 @@ package api.servico.adega.enums;
 
 import lombok.Getter;
 
+/*
+    Criando Enumeração das Formas de Pagamento
+*/
 @Getter
 public enum FormaPagamento {
     DINHEIRO("Dinheiro"),

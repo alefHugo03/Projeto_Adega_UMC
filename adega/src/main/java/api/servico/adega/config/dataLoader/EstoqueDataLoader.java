@@ -17,7 +17,9 @@ import java.util.Random;
 @Component
 @Order(3)
 public class EstoqueDataLoader implements CommandLineRunner {
-
+/*
+ *  Construtor
+*/
     private final EstoqueRepository estoqueRepository;
     private final ProdutoRepository produtoRepository;
 
@@ -26,6 +28,9 @@ public class EstoqueDataLoader implements CommandLineRunner {
         this.produtoRepository = produtoRepository;
     }
 
+    /*
+     *  Cria o Produto em estoque com base no produto que tem gerado
+    */
     @Override
     public void run(String... args) throws Exception {
         if (estoqueRepository.count() == 0) {

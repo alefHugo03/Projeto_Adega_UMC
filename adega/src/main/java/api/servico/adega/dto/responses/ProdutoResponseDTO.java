@@ -6,6 +6,9 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 
+/*
+    Criando a Resposta do Produto
+*/
 @Getter
 @Setter
 @NoArgsConstructor

@@ -13,6 +13,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/*
+    Modelo útilizado para o modelo de negócio e como vai ser usado no banco
+*/
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter @Setter

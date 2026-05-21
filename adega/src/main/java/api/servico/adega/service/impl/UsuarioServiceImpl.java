@@ -18,10 +18,8 @@ import api.servico.adega.repository.UsuarioRepository;
 import api.servico.adega.service.UsuarioService;
 
 /**
- * Implementação do service de usuário.
- *
- * Aqui ficam as regras de negócio e a conversão entre a entidade Usuario
- * e os objetos de transferência de dados (DTOs).
+ * Classe com as regras de funcionalidade do Service
+ * e regras de negócio de Usuário
  */
 @Service
 @Transactional(readOnly = true)
@@ -39,9 +37,7 @@ public class UsuarioServiceImpl implements UsuarioService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // Substituímos a exceção genérica do Spring pela sua 'ResourceNotFoundException'.
-        // Isso garante que o erro seja capturado pelo seu GlobalExceptionHandler, retornando um JSON padronizado.
-        // O retorno do tipo 'Usuario' agora é aceito como 'UserDetails' porque implementamos a interface na Model.
+
         Usuario usuario = usuarioRepository.findByEmail(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "email", username));
         return usuario;

@@ -16,6 +16,10 @@ import api.servico.adega.repository.EstoqueRepository;
 import api.servico.adega.repository.ProdutoRepository;
 import api.servico.adega.service.EstoqueService;
 
+/**
+ * Classe com as regras de funcionalidade do Service
+ * e regras de negócio de Estoque
+ */
 @Service
 @Transactional(readOnly = true)
 public class EstoqueServiceImpl implements EstoqueService {

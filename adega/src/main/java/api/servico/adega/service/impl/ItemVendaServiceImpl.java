@@ -17,6 +17,10 @@ import api.servico.adega.repository.ItemVendaRepository;
 import api.servico.adega.repository.VendaRepository;
 import api.servico.adega.service.ItemVendaService;
 
+/**
+ * Classe com as regras de funcionalidade do Service
+ * e regras de negócio de Item Venda
+ */
 @Service
 @Transactional(readOnly = true)
 public class ItemVendaServiceImpl implements ItemVendaService {

@@ -18,6 +18,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/*
+    Modelo útilizado para o modelo de negócio e como vai ser usado no banco
+*/
 @Entity
 @Table(name = "usuario") // Nome da tabela conforme aparece nos seus logs do Hibernate
 @Getter

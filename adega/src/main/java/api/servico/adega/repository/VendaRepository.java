@@ -9,7 +9,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import api.servico.adega.enums.FormaPagamento;
 import api.servico.adega.model.Venda;
+import org.springframework.stereotype.Repository;
 
+/**
+ * Repositório JPA para a entidade Venda.
+ *
+ * Usa Spring Data para fornecer operações CRUD básicas e consultas
+ * personalizadas a partir do nome dos métodos.
+ */
+@Repository
 public interface VendaRepository extends JpaRepository<Venda, Long>{
     /**
      * Procura um usuário pelo email.

@@ -15,6 +15,11 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+
+/**
+   Criação dos tokens de acesso e regras para que eles funcionem
+   e salvem nos cookies
+ */
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
 

@@ -35,6 +35,7 @@ public class EstoqueController {
         this.estoqueService = estoqueService;
     }
 
+
     /**
      * Busca estoque pelo ID.
      */

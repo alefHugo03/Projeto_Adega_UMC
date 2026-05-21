@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    name: Build & Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Ensure mvnw is executable
+        run: chmod +x ./mvnw
+
+      - name: Run unit tests (H2 in-memory)
+        env:
+          SPRING_PROFILES_ACTIVE: test
+        run: ./mvnw -B -V test
+
+      - name: Upload unit test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: |
+            **/target/surefire-reports
+
+  integration:
+    name: Integration Tests (MySQL)
+    needs: build
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: adega_test
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=5s
+          --health-timeout=2s
+          --health-retries=20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Ensure mvnw is executable
+        run: chmod +x ./mvnw
+
+      - name: Wait for MySQL to be ready
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y default-mysql-client
+          for i in {1..30}; do
+            mysql -h 127.0.0.1 -P 3306 -u "${{ secrets.MYSQL_USER }}" -p"${{ secrets.MYSQL_PASSWORD }}" -e "SELECT 1" && break || sleep 2
+          done
+
+      - name: Run integration tests (MySQL)
+        env:
+          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/adega_test?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+          SPRING_DATASOURCE_USERNAME: ${{ secrets.MYSQL_USER }}
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+        run: ./mvnw -B -V test
+
+      - name: Upload integration test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-surefire-reports
+          path: |
+            **/target/surefire-reports
+            **/target/failsafe-reports

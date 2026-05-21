@@ -96,6 +96,9 @@ public class ItemVendaController {
         return ResponseEntity.noContent().build();
     }
 
+    /*
+     *  Exclui um item de venda pelo ID da venda.
+     */
     @DeleteMapping("/venda/{id}")
     public ResponseEntity<Void> excluirVendaPorIdVenda(@PathVariable Long id) {
         itemVendaService.excluirPorIdVenda(id);
