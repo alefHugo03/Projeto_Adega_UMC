@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.Setter;
 import java.util.List;
 
+/*
+    Criando a Requisição da Venda
+*/
 @Getter
 @Setter
 public class VendaRequestDTO {

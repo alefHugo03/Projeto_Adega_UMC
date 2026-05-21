@@ -23,7 +23,9 @@ import api.servico.adega.enums.FormaPagamento;
 @Component
 @Order(5)
 public class ItemVendaDataLoader implements CommandLineRunner {
-
+/*
+ *  Criação dos Construtores
+*/
     private final ItemVendaRepository itemVendaRepository;
     private final VendaRepository vendaRepository;
     private final ProdutoRepository produtoRepository;
@@ -38,6 +40,10 @@ public class ItemVendaDataLoader implements CommandLineRunner {
         this.produtoRepository = produtoRepository;
         this.pagamentoVendaRepository = pagamentoVendaRepository;
     }
+
+    /*
+     *  Criação dos itens de venda com base na venda e produto criado
+    */
 
     @Override
     public void run(String... args) throws Exception {
@@ -66,10 +72,9 @@ public class ItemVendaDataLoader implements CommandLineRunner {
                     venda.setValorTotal(total);
                     vendaRepository.save(venda);
 
-                    // ALTERADO: Passando o ID numérico da venda (.getIdVenda())
                     List<PagamentoVenda> pgs = pagamentoVendaRepository.findByVenda_IdVenda(venda.getIdVenda());
                     if (!pgs.isEmpty()) {
-                        PagamentoVenda pg = pgs.get(0);
+                        PagamentoVenda pg = pgs.getFirst();
                         if (FormaPagamento.RETIRADA_ADMIN.equals(pg.getFormaPagamento())) {
                             // Manter retirada administrativa com valor zerado e marcar motivo
                             pg.setValorPago(BigDecimal.ZERO);

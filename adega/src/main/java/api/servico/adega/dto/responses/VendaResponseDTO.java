@@ -7,6 +7,9 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/*
+    Criando a Resposta da Venda
+*/
 @Getter
 @Setter
 @NoArgsConstructor

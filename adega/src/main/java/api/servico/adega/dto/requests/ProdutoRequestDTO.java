@@ -4,6 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
+/*
+    Criando a Requisição do Produto
+*/
 @Getter
 @Setter
 public class ProdutoRequestDTO {

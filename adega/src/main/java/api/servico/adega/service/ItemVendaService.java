@@ -5,6 +5,9 @@ import api.servico.adega.dto.responses.ItemVendaResponseDTO;
 
 import java.util.List;
 
+/**
+ * Interface para criação do Service de Item Venda
+ */
 public interface ItemVendaService {
 
     ItemVendaResponseDTO buscarPorIdItemVenda(Long id);

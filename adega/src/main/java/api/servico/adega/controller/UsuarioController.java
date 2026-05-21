@@ -29,14 +29,15 @@ import java.util.List;
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
 
-    private final UsuarioService usuarioService;
-
     /**
-     * Injeção do service que encapsula a lógica de negócios.
+     * Construtores
      */
     public UsuarioController(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
     }
+
+    private final UsuarioService usuarioService;
+
 
     /**
      * Lista todos os usuários ou filtra por nome quando o parâmetro for informado.

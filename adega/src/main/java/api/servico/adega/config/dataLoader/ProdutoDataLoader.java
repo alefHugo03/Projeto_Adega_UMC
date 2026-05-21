@@ -17,12 +17,19 @@ import api.servico.adega.repository.ProdutoRepository;
 @Order(2)
 public class ProdutoDataLoader implements CommandLineRunner {
 
+/*
+*   Criação dos Construtores
+*/
     private final ProdutoRepository produtoRepository;
 
     public ProdutoDataLoader(ProdutoRepository produtoRepository) {
         this.produtoRepository = produtoRepository;
     }
 
+
+    /*
+     *  Criação dos Produtos caso já não tenha sido criada no banco de dados
+     */
     @Override
     public void run(String... args) throws Exception {
         if (produtoRepository.count() == 0) {

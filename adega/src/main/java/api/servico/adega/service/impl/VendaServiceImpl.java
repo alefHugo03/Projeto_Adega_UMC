@@ -35,6 +35,10 @@ import api.servico.adega.service.VendaService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.prepost.PreAuthorize;
 
+/**
+ * Classe com as regras de funcionalidade do Service
+ * e regras de negócio da Venda
+ */
 @Service
 @Transactional(readOnly = true)
 public class VendaServiceImpl implements VendaService {

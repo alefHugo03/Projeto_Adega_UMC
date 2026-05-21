@@ -2,6 +2,7 @@ package api.servico.adega.repository;
 
 import api.servico.adega.model.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,6 +13,7 @@ import java.util.Optional;
  * Usa Spring Data para fornecer operações CRUD básicas e consultas
  * personalizadas a partir do nome dos métodos.
  */
+@Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     /**

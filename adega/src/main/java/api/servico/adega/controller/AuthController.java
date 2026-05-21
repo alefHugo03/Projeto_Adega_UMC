@@ -8,7 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
-
+/*
+ *  Criação do acesso a API com apresentação de senhas
+ *  para funcionar com JWT
+ */
 @RestController
 @RequestMapping("/auth")
 public class AuthController {

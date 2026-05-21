@@ -17,6 +17,9 @@ import api.servico.adega.repository.UsuarioRepository;
 @Order(1)
 public class UsuarioDataLoader implements CommandLineRunner {
 
+/*
+ *  Criação dos Construtores
+*/
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -24,6 +27,10 @@ public class UsuarioDataLoader implements CommandLineRunner {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
     }
+    /*
+     *  Criação dos Usuários com seu tipo de acesso
+     *  caso não tenham do banco de dados
+    */
 
     @Override
     public void run(String... args) throws Exception {

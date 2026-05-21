@@ -5,6 +5,9 @@ import java.util.List;
 import api.servico.adega.dto.requests.ProdutoRequestDTO;
 import api.servico.adega.dto.responses.ProdutoResponseDTO;
 
+/**
+ * Interface para criação do Service de Produto
+ */
 public interface ProdutoService {
 
     List<ProdutoResponseDTO> listarProdutos();

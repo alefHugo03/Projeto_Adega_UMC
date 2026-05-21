@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.math.BigDecimal;
 
+/*
+    Modelo útilizado para o modelo de negócio e como vai ser usado no banco
+*/
 @Entity
 @Table(name = "pagamentos_venda")
 @Getter @Setter

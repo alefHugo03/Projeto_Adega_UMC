@@ -14,6 +14,10 @@ import api.servico.adega.model.Produto;
 import api.servico.adega.repository.ProdutoRepository;
 import api.servico.adega.service.ProdutoService;
 
+/**
+ * Classe com as regras de funcionalidade do Service
+ * e regras de negócio de Produto
+ */
 @Service
 @Transactional(readOnly = true)
 public class ProdutoServiceImpl implements ProdutoService {

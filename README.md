@@ -118,3 +118,28 @@ Com a aplicação rodando, você pode acessar a documentação interativa das ro
 * **Arthur** - *Desenvolvimento Inicial* - alefHugo03
 * **Richard** - *Desenvolvimento Inicial* - alefHugo03
 * **Vitor** - *Desenvolvimento Inicial* - alefHugo03
+
+---
+
+## 🔁 Integração Contínua (CI)
+
+O projeto inclui um workflow de CI em `.github/workflows/ci.yml` que executa os testes
+usando o Maven wrapper e, quando configurado, inicia um serviço MySQL para testes de integração.
+
+Para que o workflow execute corretamente no GitHub Actions, crie os *repository secrets* abaixo
+no repositório (Settings → Secrets and variables → Actions):
+
+- `MYSQL_ROOT_PASSWORD`
+- `MYSQL_USER`
+- `MYSQL_PASSWORD`
+
+Exemplo rápido com `gh` CLI:
+```bash
+gh secret set MYSQL_ROOT_PASSWORD --body 'rootpass_test'
+gh secret set MYSQL_USER --body 'testuser'
+gh secret set MYSQL_PASSWORD --body 'testpass'
+```
+
+Se preferir não expor um banco no CI, o projeto já tem `src/test/resources/application.properties`
+que usa H2 em memória — opção mais rápida/segura para testes unitários.
+

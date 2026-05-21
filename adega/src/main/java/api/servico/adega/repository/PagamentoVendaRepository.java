@@ -5,6 +5,12 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+/**
+ * Repositório JPA para a entidade Pagamento.
+ *
+ * Usa Spring Data para fornecer operações CRUD básicas e consultas
+ * personalizadas a partir do nome dos métodos.
+ */
 @Repository
 public interface PagamentoVendaRepository extends JpaRepository<PagamentoVenda, Long> {
     // Busca todos os pagamentos associados ao ID de uma venda específica

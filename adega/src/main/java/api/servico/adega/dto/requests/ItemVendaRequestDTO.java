@@ -5,6 +5,9 @@ import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
 
+/*
+    Criando a Requisição do Item Venda
+*/
 @Getter
 @Setter
 public class ItemVendaRequestDTO {

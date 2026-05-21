@@ -8,6 +8,10 @@ import api.servico.adega.model.Usuario;
 import api.servico.adega.service.AuthService;
 import api.servico.adega.service.TokenService;
 
+/**
+ * Classe com as regras de funcionalidade do Service
+ * e regras de negócio de Autenticação
+ */
 @Service
 public class AuthServiceImpl implements AuthService {
 
