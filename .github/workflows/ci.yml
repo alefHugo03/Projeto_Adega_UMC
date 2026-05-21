@@ -86,9 +86,13 @@ jobs:
 
       - name: Run integration tests (MySQL)
         env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/adega_test?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-          SPRING_DATASOURCE_USERNAME: ${{ secrets.MYSQL_USER }}
-          SPRING_DATASOURCE_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          SPRING_PROFILES_ACTIVE: integration
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          MYSQL_DATABASE: adega_test
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          API_SECURITY_TOKEN_SECRET: ${{ secrets.API_SECURITY_TOKEN_SECRET }}
         run: ./mvnw -B -V test
 
       - name: Upload integration test reports
