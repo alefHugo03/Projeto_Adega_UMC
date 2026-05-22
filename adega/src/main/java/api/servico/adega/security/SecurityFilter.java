@@ -44,12 +44,12 @@ public class SecurityFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
                 // Lógica de Renovação (Sliding Expiration)
-                // Gera um novo token e atualiza o cookie para estender a "sessão" por mais 5 minutos
+                // Gera um novo token e atualiza o cookie para estender a "sessão" por mais 10 minutos
                 String novoToken = tokenService.gerarToken(usuario);
                 Cookie cookie = new Cookie("jwt_token", novoToken);
                 cookie.setPath("/");
                 cookie.setHttpOnly(true); // Segurança: impede acesso via JS
-                cookie.setMaxAge(60);   // 5 minutos em segundos
+                cookie.setMaxAge(600);  // 10 minutos em segundos (600s)
                 response.addCookie(cookie);
             }
         }
