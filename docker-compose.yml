@@ -34,6 +34,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=${MYSQL_USER}
       - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - API_SECURITY_TOKEN_SECRET=${API_SECURITY_TOKEN_SECRET}
 
 volumes:
   db_data: # Volume nomeado para armazenar dados do MySQL.
