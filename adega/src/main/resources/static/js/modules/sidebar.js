@@ -1,4 +1,5 @@
 import { isAdmin } from '../usuario/acoes.js';
+import { initSessionMonitor } from './session.js';
 
 export function loadSidebar() {
     const container = document.getElementById('sidebar-container');
@@ -31,4 +32,7 @@ export function loadSidebar() {
     `;
 
     container.innerHTML = sidebarHTML;
+
+    // Inicia o monitoramento de inatividade assim que o sistema carregar a navegação
+    initSessionMonitor();
 }
