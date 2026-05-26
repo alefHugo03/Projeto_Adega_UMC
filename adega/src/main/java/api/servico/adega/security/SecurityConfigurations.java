@@ -26,7 +26,7 @@ public class SecurityConfigurations {
 /*
     Construtor
  */
-    @Value("${server.port}")
+    @Value("${server.port:8443}")
     private int httpsPort;
 
     @Value("${server.http.port:8080}")
