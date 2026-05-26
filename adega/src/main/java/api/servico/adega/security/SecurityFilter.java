@@ -49,6 +49,7 @@ public class SecurityFilter extends OncePerRequestFilter {
                 Cookie cookie = new Cookie("jwt_token", novoToken);
                 cookie.setPath("/");
                 cookie.setHttpOnly(true); // Segurança: impede acesso via JS
+                cookie.setSecure(true);   // Segurança: impede envio via HTTP comum
                 cookie.setMaxAge(600);  // 10 minutos em segundos (600s)
                 response.addCookie(cookie);
             }
