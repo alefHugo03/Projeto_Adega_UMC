@@ -6,7 +6,7 @@ import {
     ValidationError,
     InternalServerError,
     AppError 
-} from '../exception/exceptions.js'; // Ajustado para o caminho real fornecido no contexto
+} from '../exception/exceptions.js'; 
 
 async function requisitarDados(caminho, metodo, corpo = null) {
     const token = localStorage.getItem('jwt_token');

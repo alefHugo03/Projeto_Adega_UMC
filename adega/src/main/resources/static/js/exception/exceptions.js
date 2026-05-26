@@ -83,10 +83,8 @@ function handleAppError(error) {
         alert(`🔑 Sessão Expirada: ${error.message}`);
         // Limpa o token e redireciona para a página de login
         localStorage.removeItem('jwt_token');
-        // Também remove o cookie, definindo sua expiração para o passado
-        document.cookie = 'jwt_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
         // Recarrega a página, que deve levar ao login
-        window.location.href = '/'; 
+        window.location.href = '/auth/logout'; 
     } else if (error instanceof InternalServerError) {
         alert(`💥 Erro no Servidor: ${error.message}`);
     } else if (error instanceof AppError) {
