@@ -4,6 +4,7 @@ import {
     InvalidCredentialsError,
     InternalServerError, 
     ValidationError, 
+    ForbiddenError, /* <-- Adicionado aqui! */
     AppError 
 } from '../exception/exceptions.js';
 
@@ -38,7 +39,6 @@ async function realizarLogin(email, senha) {
 
         if (response.ok) {
             const data = await response.json();
-            
             
             localStorage.setItem('jwt_token', data.token);
             

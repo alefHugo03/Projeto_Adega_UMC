@@ -53,7 +53,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
-    /**
+   /**
      * Trata erros de recursos estáticos ou rotas não encontradas (404 padrão do Spring).
      */
     @Override
@@ -61,11 +61,34 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             @NonNull NoResourceFoundException ex, 
             @NonNull HttpHeaders headers, 
             @NonNull HttpStatusCode status, 
-            @NonNull WebRequest request) {
+            @NonNull WebRequest request) { // 💡 CORREÇÃO: Sem nenhuma cláusula throws aqui!
 
+        String path = request.getDescription(false).replace("uri=", "");
+
+        // Se for uma requisição de página WEB (Navegador):
+        // Usamos o método auxiliar para relançar a exceção de forma "silenciosa" para o compilador
+        if (!path.startsWith("/api/")) {
+            lançarExcecao(ex); 
+        }
+
+        // Se for uma requisição da API (/api/...):
+        // Retorna o JSON estruturado para o seu JavaScript (fetch)
         ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.NOT_FOUND.value(), "Rota não encontrada: " + ex.getResourcePath(), LocalDateTime.now(), request.getDescription(false).replace("uri=", ""));
+                HttpStatus.NOT_FOUND.value(), 
+                "Rota de API não encontrada: " + ex.getResourcePath(), 
+                LocalDateTime.now(), 
+                path
+            );
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    /**
+     * Método auxiliar (Sneaky Throws) para lançar exceções checadas 
+     * sem precisar declará-las na assinatura do método pai.
+     */
+    @SuppressWarnings("unchecked")
+    private static <E extends Throwable> void lançarExcecao(Throwable e) throws E {
+        throw (E) e;
     }
 
     /**

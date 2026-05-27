@@ -1,6 +1,9 @@
 package api.servico.adega.security;
 
+import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
+import org.apache.tomcat.util.descriptor.web.SecurityCollection;
+import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
@@ -23,40 +26,39 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfigurations {
-/*
-    Construtor
- */
+
     @Value("${server.port:8443}")
     private int httpsPort;
 
     @Value("${server.http.port:8080}")
     private int httpPort;
 
+    // 💡 Correção do Erro 1: A variável final exige este construtor exato abaixo
     private final SecurityFilter securityFilter;
 
     public SecurityConfigurations(SecurityFilter securityFilter) {
         this.securityFilter = securityFilter;
     }
 
-    /*
-        Criação para forçar quem não tiver o token
-        fazer o login
-     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(csrf -> csrf.disable())
-                .requiresChannel(channel -> channel.anyRequest().requiresSecure())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> {
-                    // Permite acesso ao login e recursos estáticos (CSS, JS)
                     req.requestMatchers(HttpMethod.POST, "/auth/login").permitAll();
-                    req.requestMatchers(HttpMethod.GET, "/login", "/css/**", "/js/**", "/img/**").permitAll();
-                    req.requestMatchers(HttpMethod.DELETE, "/api/**").authenticated();
+                    // Liberação total das rotas visuais e de erro
+                    req.requestMatchers("/login", "/css/**", "/js/**", "/img/**", "/error", "/error/404").permitAll();
                     
-                    // Qualquer outra requisição deve estar autenticada
+                    req.requestMatchers(HttpMethod.DELETE, "/api/**").authenticated();
                     req.anyRequest().authenticated();
                 })
-                .exceptionHandling(ex -> ex.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")))
+                .exceptionHandling(ex -> ex
+                        // Trata rotas web inexistentes redirecionando limpo para o login
+                        .defaultAuthenticationEntryPointFor(
+                                new LoginUrlAuthenticationEntryPoint("/login"),
+                                org.springframework.security.web.util.matcher.AnyRequestMatcher.INSTANCE
+                        )
+                )
                 .logout(logout -> logout
                         .logoutUrl("/auth/logout")
                         .deleteCookies("jwt_token")
@@ -66,6 +68,7 @@ public class SecurityConfigurations {
                 .build();
     }
 
+    // 💡 Correção dos Erros 2, 3 e 4: O tipo "AuthenticationManager" precisa estar explícito aqui
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
@@ -78,7 +81,20 @@ public class SecurityConfigurations {
 
     @Bean
     public ServletWebServerFactory servletContainer() {
-        TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory();
+        TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory() {
+            @Override
+            protected void postProcessContext(Context context) {
+                SecurityConstraint securityConstraint = new SecurityConstraint();
+                securityConstraint.setUserConstraint("CONFIDENTIAL");
+                
+                SecurityCollection collection = new SecurityCollection();
+                collection.addPattern("/*");
+                securityConstraint.addCollection(collection);
+                
+                context.addConstraint(securityConstraint);
+            }
+        };
+        
         tomcat.addAdditionalTomcatConnectors(createHttpConnector());
         return tomcat;
     }

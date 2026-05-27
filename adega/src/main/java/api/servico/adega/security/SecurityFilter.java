@@ -33,25 +33,49 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        String uri = request.getRequestURI();
+        
+        // 1. Recursos estáticos continuam sendo ignorados completamente (ganho de performance)
+        boolean isRecursoEstatico = uri.startsWith("/css/") || 
+                                    uri.startsWith("/js/")  || 
+                                    uri.startsWith("/img/") || 
+                                    uri.equals("/favicon.ico");
+
+        if (isRecursoEstatico) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         var tokenJWT = recuperarToken(request);
 
         if (tokenJWT != null) {
-            var subject = tokenService.getSubject(tokenJWT);
-            var usuario = repository.findByEmail(subject).orElse(null);
+            try {
+                var subject = tokenService.getSubject(tokenJWT);
+                
+                if (subject != null) {
+                    var usuario = repository.findByEmail(subject).orElse(null);
 
-            if (usuario != null) {
-                var authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    if (usuario != null) {
+                        var authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                // Lógica de Renovação (Sliding Expiration)
-                // Gera um novo token e atualiza o cookie para estender a "sessão" por mais 10 minutos
-                String novoToken = tokenService.gerarToken(usuario);
-                Cookie cookie = new Cookie("jwt_token", novoToken);
-                cookie.setPath("/");
-                cookie.setHttpOnly(true); // Segurança: impede acesso via JS
-                cookie.setSecure(true);   // Segurança: impede envio via HTTP comum
-                cookie.setMaxAge(600);  // 10 minutos em segundos (600s)
-                response.addCookie(cookie);
+                        // 💡 A CHAVE AQUI: Autenticamos o usuário para o "/error" e "/login", 
+                        // mas NÃO geramos um novo cookie para essas rotas de controle.
+                        boolean isRotaDeControle = uri.equals("/error") || uri.equals("/login");
+
+                        if (!isRotaDeControle) {
+                            String novoToken = tokenService.getSubject(tokenJWT); // ou tokenService.gerarToken(usuario);
+                            Cookie cookie = new Cookie("jwt_token", tokenService.gerarToken(usuario));
+                            cookie.setPath("/");
+                            cookie.setHttpOnly(true); 
+                            cookie.setSecure(true);   
+                            cookie.setMaxAge(600);  
+                            response.addCookie(cookie);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                SecurityContextHolder.clearContext();
             }
         }
 
@@ -75,5 +99,15 @@ public class SecurityFilter extends OncePerRequestFilter {
         }
 
         return null;
+    }
+    /**
+     * IMPORTANTE: Permite que o filtro seja executado durante os despachos internos 
+     * de erro do Spring (como o forward para /error). 
+     * Isso impede que o contexto de segurança seja apagado antes de o ViewController 
+     * decidir qual página HTML de erro mostrar.
+     */
+    @Override
+    protected boolean shouldNotFilterErrorDispatch() {
+        return false;
     }
 }
