@@ -1,9 +1,7 @@
 package api.servico.adega.service.impl;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-
+import java.time.temporal.ChronoUnit;
 import java.nio.charset.StandardCharsets;
 
 import jakarta.annotation.PostConstruct;
@@ -71,6 +69,6 @@ public class TokenServiceImpl implements TokenService {
     }
 
     private Instant dataExpiracao() {
-        return LocalDateTime.now().plusMinutes(10).toInstant(ZoneOffset.of("-03:00"));
+        return Instant.now().plus(10, ChronoUnit.MINUTES);
     }
 }

@@ -7,9 +7,13 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/dashboard.css}">
     <link rel="stylesheet" th:href="@{/css/home.css}">
-    <!-- Importação do Chart.js via CDN -->
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Font Awesome para ícones -->
+    
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.0/dist/chartjs-adapter-luxon.umd.min.js"></script>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="dashboard-body">
@@ -112,13 +116,6 @@
                     <canvas id="chartEstoque"></canvas>
                 </div>
             </section>
-
-            <!-- Visualização 3D WebGL -->
-            <section class="card chart-card mt-4">
-                <h3>Monitoramento de Estoque 3D (WebGL)</h3>
-                <div id="estoque-3d-container" style="height: 400px; width: 100%; border-radius: 8px; overflow: hidden; background: radial-gradient(circle, #1a1a1a 0%, #000 100%);"></div>
-                <p class="text-muted" style="margin-top: 10px; font-size: 0.85rem;">As barras douradas representam a quantidade em estoque acelerada via hardware.</p>
-            </section>
             
 
             <div class="insights-grid mt-4">
@@ -136,7 +133,6 @@
     <script type="module" th:src="@{/js/home/home.js}"></script>
     <script type="module">
         import { loadSidebar } from '/js/modules/sidebar.js';
-        import { renderizarEstoque3D } from '/js/home/webgl-charts.js';
         import requisitarDados from '/js/conection/query.js';
         import logout from '/js/conection/logout.js';
 
@@ -145,22 +141,8 @@
         // Carrega a sidebar e ajusta a visibilidade do menu de usuários
         document.addEventListener('DOMContentLoaded', () => {
             loadSidebar();
-            
-            // Inicializa o gráfico WebGL com dados reais
-            carregarGrafico3D();
         });
 
-        async function carregarGrafico3D() {
-            try {
-                const response = await requisitarDados('/api/vendas?size=500', 'GET');
-                const vendas = response && response.content ? response.content : (Array.isArray(response) ? response : []);
-                if (vendas.length > 0) {
-                    renderizarEstoque3D('estoque-3d-container', vendas);
-                }
-            } catch (error) {
-                console.error("Não foi possível carregar o gráfico 3D:", error);
-            }
-        }
     </script>
 </body>
 </html>

@@ -1,21 +1,12 @@
 import requisitarDados from '../conection/query.js';
-
-/**
- * Configurações globais de cores para combinar com o tema Black/Gold
- */
-const colors = {
-    primary: '#D4AF37',
-    hover: '#B8860B',
-    text: '#F5F5F5',
-    grid: '#333',
-    palette: ['#D4AF37', '#8B4513', '#DAA520', '#B8860B', '#F5DEB3', '#A0522D']
-};
-
-const chartDefaults = {
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: { duration: 900, easing: 'easeOutQuart' }
-};
+import {
+    renderEstoqueChart,
+    renderCategoriaChart,
+    renderPagamentoChart,
+    renderVendedorChart,
+    renderVendasTempoChart,
+    renderVendasMensalChart
+} from './graficos.js';
 
 const currencyFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const shortDateFormatter = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' });
@@ -68,15 +59,67 @@ function atualizarGraficoSemanal(type) {
     inicioSemana.setDate(hoje.getDate() - hoje.getDay());
     inicioSemana.setHours(0,0,0,0);
     // Filtra vendas estritamente desta semana
+    
     const vendasSemana = dashboardData.vendas.filter(v => {
         const d = new Date(v.dataVenda);
         return d >= inicioSemana && d <= hoje;
     });
 
     switch (type) {
-        case 'vendasTempo': instanceSemanal = renderVendasTempoChart(ctx, vendasSemana); break;
-        case 'pagamento': instanceSemanal = renderPagamentoChart(ctx, vendasSemana); break;
-        case 'vendedor': instanceSemanal = renderVendedorChart(ctx, vendasSemana); break;
+        case 'vendasTempo': {
+            const aggregatedData = [];
+            const domingo = new Date(hoje);
+            domingo.setDate(hoje.getDate() - hoje.getDay());
+            domingo.setHours(0, 0, 0, 0); // Início do dia
+
+            // 1. Inicializa os pontos usando TIMESTAMPS (Números) em vez de strings ISO
+            for (let i = 0; i < 7; i++) { 
+                const d = new Date(domingo);
+                d.setDate(domingo.getDate() + i);
+                // CORREÇÃO: Guardamos o .getTime() puro no 'x'
+                aggregatedData.push({ x: d.getTime(), y: 0 });
+            }
+
+            // 2. Agrupa os valores das vendas batendo as datas convertidas para o início do dia
+            vendasSemana.filter(v => v.active).forEach(v => {
+                const dataVenda = new Date(v.dataVenda);
+                // Zera as horas da venda para bater com o dia correto do loop anterior
+                dataVenda.setHours(0, 0, 0, 0);
+                const timestampVenda = dataVenda.getTime();
+
+                // Encontra a entrada correspondente pelo número do timestamp
+                const existingEntry = aggregatedData.find(entry => entry.x === timestampVenda);
+                if (existingEntry) {
+                    existingEntry.y += (parseFloat(v.valorTotal) || 0);
+                }
+            });
+
+            // 3. Ordena numericamente os timestamps para a linha não cruzar o gráfico de forma errada
+            aggregatedData.sort((a, b) => a.x - b.x);
+
+            // Passa os dados 100% numéricos para o gráfico otimizado
+            instanceSemanal = renderVendasTempoChart(ctx, aggregatedData); 
+            break;
+        }
+        case 'pagamento': {
+            const pagamentos = {};
+            vendasSemana.filter(v => v.active).forEach(v => {
+                const forma = v.resumoPagamento || v.formaPagamento || 'Outros';
+                pagamentos[forma] = (pagamentos[forma] || 0) + (parseFloat(v.valorTotal) || 0);
+            });
+            const entries = Object.entries(pagamentos).sort((a, b) => b[1] - a[1]);
+            instanceSemanal = renderPagamentoChart(ctx, entries.map(e => e[0]), entries.map(e => e[1]));
+            break;
+        }
+        case 'vendedor': {
+            const vendedores = {};
+            vendasSemana.filter(v => v.active).forEach(v => {
+                const nome = v.usuario?.nome || v.user?.nome || 'Sistema';
+                vendedores[nome] = (vendedores[nome] || 0) + (parseFloat(v.valorTotal) || 0);
+            });
+            instanceSemanal = renderVendedorChart(ctx, Object.entries(vendedores).sort((a, b) => b[1] - a[1]));
+            break;
+        }
     }
 }
 
@@ -90,8 +133,32 @@ function atualizarGraficoMensal(type) {
     const vendasAtivas = dashboardData.vendas.filter(v => v.active);
 
     switch (type) {
-        case 'vendasMensal': instanceMensal = renderVendasMensalChart(ctx, vendasAtivas); break;
-        case 'categoria': instanceMensal = renderCategoriaChart(ctx, dashboardData.estoques); break;
+        case 'vendasMensal': {
+            const faturamentoMensal = {};
+            const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            const hoje = new Date();
+            for (let i = 5; i >= 0; i--) {
+                const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+                const label = meses[d.getMonth()] + '/' + d.getFullYear().toString().slice(-2);
+                faturamentoMensal[label] = 0;
+            }
+            vendasAtivas.forEach(v => {
+                const d = new Date(v.dataVenda);
+                const label = meses[d.getMonth()] + '/' + d.getFullYear().toString().slice(-2);
+                if (faturamentoMensal[label] !== undefined) faturamentoMensal[label] += (parseFloat(v.valorTotal) || 0);
+            });
+            instanceMensal = renderVendasMensalChart(ctx, Object.keys(faturamentoMensal), Object.values(faturamentoMensal));
+            break;
+        }
+        case 'categoria': {
+            const categorias = {};
+            dashboardData.estoques.forEach(item => {
+                const cat = item.produto?.tipoProduto || 'Outros';
+                categorias[cat] = (categorias[cat] || 0) + (item.quantidade || 0);
+            });
+            instanceMensal = renderCategoriaChart(ctx, Object.keys(categorias), Object.values(categorias));
+            break;
+        }
     }
 }
 
@@ -194,245 +261,4 @@ function renderQuickLists(estoques, vendas) {
             `).join('')
             : '<li>Nenhuma venda recente</li>';
     }
-}
-
-/** 1. Gráfico de Estoque por Produto (Barra Vertical) */
-function renderEstoqueChart(ctx, dados) {
-    const itensOrdenados = sortByValueDesc(dados, item => item.quantidade).slice(0, 10);
-    return new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: itensOrdenados.map(d => d.produto.nomeProduto),
-            datasets: [{
-                label: 'Qtd em Estoque',
-                data: itensOrdenados.map(d => d.quantidade),
-                backgroundColor: itensOrdenados.map(d => d.quantidade < 5 ? '#e74c3c' : colors.primary),
-                borderColor: colors.primary,
-                borderWidth: 1
-            }]
-        },
-        options: {
-            ...chartDefaults,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: context => `${context.dataset.label}: ${context.formattedValue} unidades`
-                    }
-                }
-            },
-            scales: {
-                y: { beginAtZero: true, grid: { color: colors.grid }, ticks: { color: colors.text } },
-                x: { ticks: { color: colors.text }, grid: { display: false } }
-            }
-        }
-    });
-}
-
-/** 2. Distribuição por Categoria (Doughnut) - Baseado no Estoque Atual */
-function renderCategoriaChart(ctx, estoques) {
-    const categorias = {};
-    estoques.forEach(item => {
-        const cat = item.produto?.tipoProduto || 'Outros';
-        categorias[cat] = (categorias[cat] || 0) + (item.quantidade || 0);
-    });
-
-    const labels = Object.keys(categorias);
-    const values = Object.values(categorias);
-
-    return new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels,
-            datasets: [{
-                data: values,
-                backgroundColor: colors.palette,
-                borderWidth: 0
-            }]
-        },
-        options: {
-            ...chartDefaults,
-            plugins: {
-                legend: { position: 'bottom', labels: { color: colors.text } },
-                tooltip: {
-                    callbacks: {
-                        label: context => `${context.label}: ${context.parsed} unidades`
-                    }
-                }
-            }
-        }
-    });
-}
-
-/** 3. Formas de Pagamento (Pie) */
-function renderPagamentoChart(ctx, vendas) {
-    const pagamentos = {};
-    vendas.filter(v => v.active).forEach(v => {
-        const forma = v.resumoPagamento || v.formaPagamento || 'Outros';
-        const valor = parseFloat(v.valorTotal) || 0;
-        pagamentos[forma] = (pagamentos[forma] || 0) + valor;
-    });
-
-    const entries = Object.entries(pagamentos).sort((a, b) => b[1] - a[1]);
-    const labels = entries.map(entry => entry[0]);
-    const values = entries.map(entry => entry[1]);
-
-    return new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels,
-            datasets: [{
-                data: values,
-                backgroundColor: ['#28a745', '#007bff', '#ffc107', '#D4AF37', '#A0522D'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            ...chartDefaults,
-            plugins: {
-                legend: { position: 'bottom', labels: { color: colors.text } },
-                tooltip: {
-                    callbacks: {
-                        label: context => `${context.label}: ${currencyFormatter.format(context.parsed)}`
-                    }
-                }
-            }
-        }
-    });
-}
-
-/** 4. Desempenho por Vendedor (Barra Horizontal) */
-function renderVendedorChart(ctx, vendas) {
-    const vendedores = {};
-    vendas.filter(v => v.active).forEach(v => {
-        const nome = v.usuario?.nome || v.user?.nome || 'Sistema';
-        const valor = parseFloat(v.valorTotal) || 0;
-        vendedores[nome] = (vendedores[nome] || 0) + valor;
-    });
-
-    const entries = Object.entries(vendedores).sort((a, b) => b[1] - a[1]);
-    return new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: entries.map(entry => entry[0]),
-            datasets: [{
-                label: 'Total Vendido (R$)',
-                data: entries.map(entry => entry[1]),
-                backgroundColor: '#DAA520'
-            }]
-        },
-        options: {
-            ...chartDefaults,
-            indexAxis: 'y',
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: context => `${context.dataset.label}: ${currencyFormatter.format(context.parsed.x)}`
-                    }
-                }
-            },
-            scales: {
-                x: { ticks: { color: colors.text, callback: value => currencyFormatter.format(value) }, grid: { color: colors.grid } },
-                y: { ticks: { color: colors.text } }
-            }
-        }
-    });
-}
-
-/** 5. Vendas no Tempo - Semana Atual (Line) */
-function renderVendasTempoChart(ctx, vendas) {
-    const diasSemana = {};
-    const hoje = new Date();
-    const domingo = new Date(hoje);
-    domingo.setDate(hoje.getDate() - hoje.getDay());
-
-    for (let i = 0; i < 7; i++) {
-        const d = new Date(domingo);
-        d.setDate(domingo.getDate() + i);
-        diasSemana[d.toLocaleDateString('pt-BR').slice(0, 5)] = 0;
-    }
-
-    vendas.filter(v => v.active).forEach(v => {
-        const data = new Date(v.dataVenda).toLocaleDateString('pt-BR').slice(0, 5);
-        const valor = parseFloat(v.valorTotal) || 0;
-        if (diasSemana[data] !== undefined) diasSemana[data] += valor;
-    });
-
-    return new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: Object.keys(diasSemana),
-            datasets: [{
-                label: 'Faturamento Semana (R$)',
-                data: Object.values(diasSemana),
-                borderColor: colors.primary,
-                backgroundColor: 'rgba(212, 175, 55, 0.1)',
-                fill: true,
-                tension: 0.4
-            }]
-        },
-        options: {
-            ...chartDefaults,
-            scales: { 
-                y: { 
-                    beginAtZero: true,
-                    ticks: { 
-                        color: colors.text,
-                        callback: (value) => currencyFormatter.format(value)
-                    }, 
-                    grid: { color: colors.grid } 
-                }, 
-                x: { ticks: { color: colors.text } } 
-            }
-        }
-    });
-}
-
-/** 6. Evolução Mensal - Divisão por Meses do Ano (Bar) */
-function renderVendasMensalChart(ctx, vendas) {
-    const faturamentoMensal = {};
-    const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-    
-    // Inicializa os últimos 6 meses com zero
-    const hoje = new Date();
-    for (let i = 5; i >= 0; i--) {
-        const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
-        const label = meses[d.getMonth()] + '/' + d.getFullYear().toString().slice(-2);
-        faturamentoMensal[label] = 0;
-    }
-
-    vendas.forEach(v => {
-        const d = new Date(v.dataVenda);
-        const label = meses[d.getMonth()] + '/' + d.getFullYear().toString().slice(-2);
-        if (faturamentoMensal[label] !== undefined) {
-            faturamentoMensal[label] += (parseFloat(v.valorTotal) || 0);
-        }
-    });
-
-    return new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: Object.keys(faturamentoMensal),
-            datasets: [{
-                label: 'Total por Mês (R$)',
-                data: Object.values(faturamentoMensal),
-                backgroundColor: colors.palette[1],
-                borderRadius: 5
-            }]
-        },
-        options: {
-            ...chartDefaults,
-            scales: { 
-                y: { 
-                    beginAtZero: true,
-                    ticks: { 
-                        color: colors.text,
-                        callback: (value) => currencyFormatter.format(value)
-                    }, 
-                    grid: { color: colors.grid } 
-                }, 
-                x: { ticks: { color: colors.text } } 
-            }
-        }
-    });
 }
