@@ -1,95 +1,154 @@
-/* Estilos espec�ficos para a p�gina Home */
+/* =======================================================
+   REORGANIZAÇÃO E DESIGN PREMIUM PARA O DASHBOARD (HOME)
+======================================================= */
 
+/* --- Painel Superior de Estatísticas (Grid Dinâmico para 5 Cards) --- */
 .stats-panel {
     display: grid;
-    grid-template-columns: repeat(4, minmax(180px, 1fr));
-    gap: 1rem;
+    /* auto-fit organiza os 5 cards de forma harmoniosa na tela sem quebrar a linha de forma feia */
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
 }
 
 .stats-card {
-    padding: 1.25rem;
-    min-height: 140px;
+    padding: 1.5rem;
+    min-height: 130px;
     display: flex;
-    gap: 1rem;
-    align-items: flex-start;
-    background: linear-gradient(180deg, rgba(26,26,26,0.98) 0%, rgba(18,18,18,0.95) 100%);
-    border: 1px solid rgba(212, 175, 55, 0.14);
+    gap: 1.2rem;
+    align-items: center;
+    background: linear-gradient(145deg, #1e1e1e 0%, #121212 100%);
+    border: 1px solid rgba(212, 175, 55, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
-.insight-card {
-    padding: 1.25rem;
-    background: linear-gradient(180deg, rgba(26,26,26,0.98) 0%, rgba(18,18,18,0.95) 100%);
-    border: 1px solid rgba(212, 175, 55, 0.14);
-    min-height: 180px;
-    display: block;
-}
-
-.insight-card h3 {
-    margin-bottom: 1rem;
+.stats-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(212, 175, 55, 0.4);
+    box-shadow: 0 15px 30px rgba(212, 175, 55, 0.1);
 }
 
 .stats-icon-wrapper {
-    min-width: 46px;
-    min-height: 46px;
+    width: 52px;
+    height: 52px;
     border-radius: 14px;
-    background: rgba(212, 175, 55, 0.12);
-    display: grid;
-    place-items: center;
+    background: rgba(212, 175, 55, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: var(--primary-color);
-    font-size: 1.1rem;
+    font-size: 1.4rem;
+    transition: background 0.3s, transform 0.3s;
+    flex-shrink: 0;
+}
+
+.stats-card:hover .stats-icon-wrapper {
+    background: var(--gold-gradient);
+    color: #000;
+    transform: scale(1.05);
 }
 
 .stats-info-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.2rem;
+    min-width: 0; /* Evita quebra de layout por textos muito extensos */
 }
 
 .stats-label {
     margin: 0;
-    font-size: 0.95rem;
-    color: var(--text-color);
-    letter-spacing: 0.02em;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
 }
 
 .stats-value-highlight {
-    margin: 0.2rem 0 0;
-    font-size: 1.35rem;
+    margin: 0;
+    font-size: 1.6rem;
     font-weight: 700;
     color: var(--white);
+    letter-spacing: -0.5px;
 }
 
 .stats-value-list {
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
-    color: var(--text-muted);
-    font-size: 0.9rem;
+    gap: 0.25rem;
+    color: #ff7675; /* Tom de alerta elegante para estoque crítico */
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* --- Organização dos Gráficos (Dashboard Grid Corrigido) --- */
+.dashboard-grid {
+    display: grid;
+    /* Alinha os gráficos Semanal e Mensal perfeitamente lado a lado em telas grandes */
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
 }
 
 .chart-card {
-    padding: 1.5rem;
-    border: 1px solid rgba(212, 175, 55, 0.14);
-    min-height: 360px;
+    background: linear-gradient(145deg, #1e1e1e 0%, #151515 100%);
+    padding: 1.8rem;
+    border: 1px solid rgba(212, 175, 55, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-card h3 {
+    margin: 0;
+    color: var(--primary-color);
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+/* Estilização dos seletores internos dos cabeçalhos dos gráficos */
+.chart-card select.form-control {
+    height: 34px !important;
+    padding: 0 2.5rem 0 1rem !important;
+    font-size: 0.85rem !important;
+    border-radius: 6px !important;
+    background-color: #252525 !important;
+    border: 1px solid #444 !important;
 }
 
 .chart-container {
     position: relative;
-    height: 300px;
+    flex-grow: 1;
     width: 100%;
+    margin-top: 1.5rem;
 }
 
-.chart-card h3,
-.insight-card h3 {
-    margin: 0 0 1rem;
-    color: var(--primary-color);
-    font-size: 1.25rem;
-}
-
+/* --- Seção de Insights (Listas Rápidas de Top Produtos e Vendas) --- */
 .insights-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(220px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.insight-card {
+    background: linear-gradient(145deg, #1e1e1e 0%, #151515 100%);
+    padding: 1.8rem;
+    border: 1px solid rgba(212, 175, 55, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+}
+
+.insight-card h3 {
+    margin: 0 0 1.2rem;
+    color: var(--primary-color);
+    font-size: 1.3rem;
+    font-weight: 600;
 }
 
 .quick-list {
@@ -98,65 +157,53 @@
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.7rem;
+    gap: 0.6rem;
 }
 
 .quick-list li {
-    padding: 0.75rem 1rem;
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.04);
+    padding: 0.9rem 1.2rem;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.03);
     display: flex;
     justify-content: space-between;
     align-items: center;
     color: var(--text-color);
-    font-size: 0.92rem;
+    font-size: 0.95rem;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.quick-list li:hover {
+    background: rgba(212, 175, 55, 0.04);
+    border-color: rgba(212, 175, 55, 0.15);
 }
 
 .quick-list li span {
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.quick-list li strong {
     color: var(--primary-color);
     font-weight: 700;
+    background: rgba(212, 175, 55, 0.08);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.9rem;
 }
 
-.d-flex {
-    display: flex;
-}
-
-.justify-content-between {
-    justify-content: space-between;
-}
-
-.align-items-center {
-    align-items: center;
-}
-
-.mb-3 {
-    margin-bottom: 1rem;
-}
-
-.form-control {
-    background: #111;
-    color: var(--text-color);
-    border: 1px solid #444;
-    border-radius: 10px;
-    padding: 0.75rem 0.9rem;
-    min-width: 220px;
-}
-
-.form-control:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.15);
-}
-
+/* --- Ajustes Responsivos de Escala --- */
 @media (max-width: 1100px) {
-    .stats-panel,
-    .insights-grid {
-        grid-template-columns: 1fr;
+    .dashboard-grid {
+        grid-template-columns: 1fr; /* Empilha os gráficos em telas menores */
     }
 }
 
 @media (max-width: 768px) {
-    .chart-container {
-        height: 260px;
+    .main-content {
+        padding: 1rem;
+    }
+    .chart-card {
+        min-height: 340px;
     }
 }

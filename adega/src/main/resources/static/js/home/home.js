@@ -17,8 +17,7 @@ let instanceMensal = null;
 let instanceEstoque = null;
 let dashboardData = { estoques: [], vendas: [] }; // Armazena os dados carregados
 
-/* 
-*   Processamento dos dados 
+/* * Processamento dos dados 
 */
 document.addEventListener('DOMContentLoaded', async () => {
     try {
@@ -58,8 +57,8 @@ function atualizarGraficoSemanal(type) {
     const inicioSemana = new Date(hoje);
     inicioSemana.setDate(hoje.getDate() - hoje.getDay());
     inicioSemana.setHours(0,0,0,0);
-    // Filtra vendas estritamente desta semana
     
+    // Filtra vendas estritamente desta semana
     const vendasSemana = dashboardData.vendas.filter(v => {
         const d = new Date(v.dataVenda);
         return d >= inicioSemana && d <= hoje;
@@ -67,38 +66,33 @@ function atualizarGraficoSemanal(type) {
 
     switch (type) {
         case 'vendasTempo': {
-            const aggregatedData = [];
+            const labels = [];
+            const valores = [];
             const domingo = new Date(hoje);
             domingo.setDate(hoje.getDate() - hoje.getDay());
-            domingo.setHours(0, 0, 0, 0); // Início do dia
+            domingo.setHours(0, 0, 0, 0); // Início do dia (Domingo)
 
-            // 1. Inicializa os pontos usando TIMESTAMPS (Números) em vez de strings ISO
+            // 1. Gera os labels (ex: "24/05") e zera os valores para os 7 dias da semana
             for (let i = 0; i < 7; i++) { 
                 const d = new Date(domingo);
                 d.setDate(domingo.getDate() + i);
-                // CORREÇÃO: Guardamos o .getTime() puro no 'x'
-                aggregatedData.push({ x: d.getTime(), y: 0 });
+                labels.push(shortDateFormatter.format(d));
+                valores.push(0);
             }
 
-            // 2. Agrupa os valores das vendas batendo as datas convertidas para o início do dia
+            // 2. Soma as vendas no dia correspondente
             vendasSemana.filter(v => v.active).forEach(v => {
                 const dataVenda = new Date(v.dataVenda);
-                // Zera as horas da venda para bater com o dia correto do loop anterior
-                dataVenda.setHours(0, 0, 0, 0);
-                const timestampVenda = dataVenda.getTime();
-
-                // Encontra a entrada correspondente pelo número do timestamp
-                const existingEntry = aggregatedData.find(entry => entry.x === timestampVenda);
-                if (existingEntry) {
-                    existingEntry.y += (parseFloat(v.valorTotal) || 0);
+                const diaFormatado = shortDateFormatter.format(dataVenda);
+                
+                const index = labels.indexOf(diaFormatado);
+                if (index !== -1) {
+                    valores[index] += (parseFloat(v.valorTotal) || 0);
                 }
             });
 
-            // 3. Ordena numericamente os timestamps para a linha não cruzar o gráfico de forma errada
-            aggregatedData.sort((a, b) => a.x - b.x);
-
-            // Passa os dados 100% numéricos para o gráfico otimizado
-            instanceSemanal = renderVendasTempoChart(ctx, aggregatedData); 
+            // 3. Chama o gráfico passando as labels e os valores em arrays simples
+            instanceSemanal = renderVendasTempoChart(ctx, labels, valores); 
             break;
         }
         case 'pagamento': {
@@ -128,8 +122,6 @@ function atualizarGraficoMensal(type) {
     if (instanceMensal) instanceMensal.destroy();
     const ctx = document.getElementById('chartMensal').getContext('2d');
     
-    // Para a visão mensal de evolução, não filtramos apenas o mês atual, 
-    // para que possamos mostrar a divisão por meses (Jan, Fev, etc)
     const vendasAtivas = dashboardData.vendas.filter(v => v.active);
 
     switch (type) {

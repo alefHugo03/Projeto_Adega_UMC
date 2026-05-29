@@ -304,6 +304,9 @@ function atualizarTotalPago() {
 /**
  * Adiciona uma nova linha de pagamento dinamicamente
  */
+/**
+ * Adiciona uma nova linha de pagamento dinamicamente
+ */
 function adicionarLinhaPagamento(pagamento = null) { // Aceita um objeto de pagamento opcional
     const container = document.getElementById('container-pagamentos');
     if (!container) {
@@ -312,28 +315,34 @@ function adicionarLinhaPagamento(pagamento = null) { // Aceita um objeto de paga
     }
 
     const div = document.createElement('div');
-    div.className = 'linha-pagamento mb-2 d-flex gap-1 align-items-center';
+    // CORREÇÃO 1: Alterado gap-1 para gap-2 para os campos respirarem melhor
+    div.className = 'linha-pagamento mb-2 d-flex gap-2 align-items-center';
     
     // Determina se este pagamento é RETIRADA_ADMIN (para novo ou para preenchimento)
     const isRetiradaAdmin = pagamento && pagamento.formaPagamento === 'RETIRADA_ADMIN';
     const requiredAttr = isRetiradaAdmin ? '' : 'required';
     
+    // CORREÇÃO 2: Adicionada a classe "form-control" nos selects e inputs.
+    // CORREÇÃO 3: Adicionado estilo ao botão de fechar para ficar perfeitamente quadrado.
     div.innerHTML = `
-        <select class="pag-forma" onchange="window.atualizarRequisitoValor(this); window.toggleParcelas(this)" required>
+        <select class="form-control pag-forma" onchange="window.atualizarRequisitoValor(this); window.toggleParcelas(this)" ${requiredAttr} style="flex: 2;">
             <option value="DINHEIRO">Dinheiro</option>
             <option value="PIX">Pix</option>
             <option value="CARTAO_DEBITO">Débito</option>
             <option value="CARTAO_CREDITO">Crédito</option>
             <option value="RETIRADA_ADMIN">Retirada Admin</option>
         </select>
-        <input type="number" class="pag-valor" name="valorPago" placeholder="Valor R$" step="0.01" ${requiredAttr} style="flex: 1;" oninput="window.atualizarTotalPago()">
-        <select class="pag-parcelas" style="display: none;">
+        
+        <input type="number" class="form-control pag-valor" name="valorPago" placeholder="Valor R$" step="0.01" ${requiredAttr} style="flex: 1.5;" oninput="window.atualizarTotalPago()">
+        
+        <select class="form-control pag-parcelas" style="display: none; flex: 1;">
             <option value="1">1x</option>
             <option value="2">2x</option>
             <option value="3">3x</option>
             <option value="4">4x</option>
         </select>
-        <button type="button" class="btn btn-danger btn-table-action" onclick="this.parentElement.remove(); window.atualizarTotalPago();">×</button>
+        
+        <button type="button" class="btn btn-danger btn-table-action" onclick="this.parentElement.remove(); window.atualizarTotalPago();" style="flex: 0 0 42px; height: 42px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px;">&times;</button>
     `;
     container.appendChild(div);
 

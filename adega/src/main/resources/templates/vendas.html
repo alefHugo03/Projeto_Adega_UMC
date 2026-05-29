@@ -7,23 +7,23 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/dashboard.css}">
     <link rel="stylesheet" th:href="@{/css/vendas.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="dashboard-body">
     <div class="layout-wrapper">
-        <!-- Sidebar injetada via JS -->
         <div id="sidebar-container"></div>
 
-        <!-- Conteúdo Principal -->
         <main class="main-content">
             <header class="content-header">
                 <div class="header-info">
                     <h1>Histórico de Vendas</h1>
                     <p>Gerencie as transações realizadas no sistema.</p>
                 </div>
-                <button class="btn btn-primary" onclick="iniciarNovaVenda()">+ Registrar Venda</button>
+                <button class="btn btn-primary" onclick="iniciarNovaVenda()">
+                    <i class="fas fa-cart-plus"></i> Registrar Venda
+                </button>
             </header>
 
-            <!-- Controles de Filtro Compactos -->
             <section class="card filter-card">
                 <div class="d-flex align-items-center gap-2">
                     <h5 class="mb-0 filter-title">FILTROS:</h5>
@@ -54,7 +54,6 @@
                     </table>
                 </div>
 
-                <!-- Controles de Paginação -->
                 <div class="d-flex justify-content-between align-items-center mt-3 p-2" style="background: #1A1A1A; border-radius: 8px;">
                     <div>
                         <button id="prev-page-btn" class="btn btn-primary btn-table-action" onclick="window.prevPage()">Anterior</button>
@@ -73,14 +72,12 @@
                         </select>
                     </div>
                 </div>
-                <!-- Fim dos Controles de Paginação -->
             </section>
         </main>
     </div>
 
-    <!-- Modal de Registro/Edição de Venda -->
     <div id="modal-venda" class="modal">
-        <div class="card modal-content">
+        <div class="card modal-content modal-lg">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2 id="modal-venda-titulo">Nova Venda</h2>
                 <button class="btn-close-modal" onclick="fecharModal('modal-venda')">&times;</button>
@@ -124,8 +121,7 @@
                     </div>
                     
                     <div id="container-pagamentos" class="mb-3">
-                        <!-- Linhas de pagamento inseridas dinamicamente pelo JS -->
-                    </div>
+                        </div>
                 </div>
 
                 <div class="d-flex justify-content-end gap-2 mt-4">
@@ -136,9 +132,8 @@
         </div>
     </div>
 
-    <!-- Modal de Detalhes -->
     <div id="modal-detalhes" class="modal">
-        <div class="card modal-content">
+        <div class="card modal-content modal-lg">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2>Itens da Venda #<span id="detalhe-id-venda"></span></h2>
                 <button class="btn-close-modal" onclick="fecharModal('modal-detalhes')">&times;</button>
@@ -152,20 +147,18 @@
                     <strong>Pagamento:</strong> <span id="detalhe-pagamento-venda" style="color: var(--primary-color); font-weight: bold;"></span>
                 </div>
                 <div class="mt-1">
-                    <strong>Motivo:</strong> <span id="detalhe-motivo-venda" style="color: var(--secondary-color);"></span>
+                    <strong>Motivo:</strong> <span id="detalhe-motivo-venda" style="color: var(--danger-color);"></span>
                 </div>
             </div>
 
             <div id="lista-itens-venda" class="itens-venda-grid mt-2">
-                <!-- Itens injetados via JS -->
-            </div>
+                </div>
             <div class="mt-3 text-right">
                 <button class="btn btn-primary" onclick="fecharModal('modal-detalhes')">Fechar</button>
             </div>
         </div>
     </div>
     
-    <!-- Scripts --> 
     <script type="module" th:src="@{/js/vendas/vendas.js}"></script>
 </body>
 </html>

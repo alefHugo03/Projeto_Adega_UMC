@@ -159,6 +159,67 @@
 @media (max-width: 1024px) {
     .stats-container { grid-template-columns: repeat(2, 1fr); }
 }
+
 @media (max-width: 600px) {
     .stats-container { grid-template-columns: 1fr; }
+} /* <--- A CHAVE DE FECHO DO @MEDIA DEVE FICAR AQUI, ANTES DOS MODAIS! ---> */
+
+/* =======================================================
+   CORREÇÃO EXCLUSIVA E ISOLADA DOS MODAIS DE VENDAS
+======================================================= */
+
+/* 1. Controla o tamanho apenas dos modais da página de vendas */
+#modal-venda .modal-content,
+#modal-detalhes .modal-content {
+    max-width: 520px !important; /* Remove o tamanho gigante e o aspecto vazio */
+}
+
+/* 2. Controla a proporção interna da linha de pagamento (Evita esmagar os campos) */
+.linha-pagamento {
+    display: flex !important;
+    gap: 10px !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+/* O seletor de Forma de Pagamento ganha um pouco mais de espaço */
+.linha-pagamento .pag-forma,
+.linha-pagamento select {
+    flex: 2 !important;
+    width: auto !important;
+}
+
+/* O campo de Valor R$ ganha a proporção perfeita para não ser esmagado */
+.linha-pagamento .pag-valor,
+.linha-pagamento input[type="number"] {
+    flex: 1.5 !important;
+    width: auto !important;
+}
+
+/* O campo de parcelas se adapta quando aparece */
+.linha-pagamento .pag-parcelas {
+    flex: 1 !important;
+    width: auto !important;
+}
+
+/* O botão de remover (X) fica estático com tamanho fixo e quadrado */
+.linha-pagamento button,
+.linha-pagamento .btn-danger {
+    flex: 0 0 42px !important;
+    height: 42px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* 3. Corrige o visual do Modal de Detalhes (Elimina o buraco vazio à direita) */
+#modal-detalhes .itens-venda-grid {
+    display: flex !important;
+    flex-direction: column !important; /* Empilha os produtos um embaixo do outro */
+    gap: 10px !important;
+}
+
+#modal-detalhes .item-venda-card {
+    width: 100% !important; /* Faz o card preencher toda a largura cinza */
 }
