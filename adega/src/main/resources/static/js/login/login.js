@@ -42,7 +42,7 @@ async function realizarLogin(email, senha) {
             
             localStorage.setItem('jwt_token', data.token);
             
-            document.cookie = `jwt_token=${data.token}; path=/; SameSite=Strict; max-age=600`;
+            document.cookie = `jwt_token=${data.token}; path=/; SameSite=Strict; max-age=600; Secure`;
 
             window.location.href = '/home'; 
         } else {

@@ -22,7 +22,7 @@ public class ViewController implements ErrorController {
     /**
      * Mapeia a tela de Login.
      * Possui uma trava de UX (Experiência do Usuário): se o usuário já estiver logado 
-     * e tentar acessar "localhost:8443/login" pela barra de endereços, o sistema 
+     * e tentar acessar "https://localhost:8080/login" pela barra de endereços, o sistema 
      * empurra ele para a /home, evitando que ele faça login duas vezes.
      */
     @GetMapping("/login")

@@ -68,7 +68,7 @@ public class SecurityFilter extends OncePerRequestFilter {
                             Cookie cookie = new Cookie("jwt_token", tokenService.gerarToken(usuario));
                             cookie.setPath("/");
                             cookie.setHttpOnly(true); 
-                            cookie.setSecure(true);   
+                            cookie.setSecure(true); // Obrigatório para HTTPS
                             cookie.setMaxAge(600);  
                             response.addCookie(cookie);
                         }
