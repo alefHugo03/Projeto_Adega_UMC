@@ -1,12 +1,5 @@
 package api.servico.adega.security;
 
-import org.apache.catalina.Context;
-import org.apache.catalina.connector.Connector;
-import org.apache.tomcat.util.descriptor.web.SecurityCollection;
-import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
-import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -27,12 +20,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfigurations {
 
-    @Value("${server.port:8443}")
-    private int httpsPort;
-
-    @Value("${server.http.port:8080}")
-    private int httpPort;
-
     // 💡 Correção do Erro 1: A variável final exige este construtor exato abaixo
     private final SecurityFilter securityFilter;
 
@@ -43,13 +30,14 @@ public class SecurityConfigurations {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(csrf -> csrf.disable())
+                // Força o reconhecimento do canal seguro (HTTPS)
+                .requiresChannel(channel -> channel.anyRequest().requiresSecure())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> {
                     req.requestMatchers(HttpMethod.POST, "/auth/login").permitAll();
-                    // Liberação total das rotas visuais e de erro
+                    // Liberação das rotas estáticas e páginas de login/erro
                     req.requestMatchers("/login", "/css/**", "/js/**", "/img/**", "/error", "/error/404").permitAll();
                     
-                    req.requestMatchers(HttpMethod.DELETE, "/api/**").authenticated();
                     req.anyRequest().authenticated();
                 })
                 .exceptionHandling(ex -> ex
@@ -77,34 +65,5 @@ public class SecurityConfigurations {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public ServletWebServerFactory servletContainer() {
-        TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory() {
-            @Override
-            protected void postProcessContext(Context context) {
-                SecurityConstraint securityConstraint = new SecurityConstraint();
-                securityConstraint.setUserConstraint("CONFIDENTIAL");
-                
-                SecurityCollection collection = new SecurityCollection();
-                collection.addPattern("/*");
-                securityConstraint.addCollection(collection);
-                
-                context.addConstraint(securityConstraint);
-            }
-        };
-        
-        tomcat.addAdditionalTomcatConnectors(createHttpConnector());
-        return tomcat;
-    }
-
-    private Connector createHttpConnector() {
-        Connector connector = new Connector(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
-        connector.setScheme("http");
-        connector.setPort(httpPort);
-        connector.setSecure(false);
-        connector.setRedirectPort(httpsPort);
-        return connector;
     }
 }
