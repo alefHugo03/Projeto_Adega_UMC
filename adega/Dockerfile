@@ -1,12 +1,23 @@
-# Estágio 1: Build
-FROM maven:3.9.6-eclipse-temurin-21 AS build
-WORKDIR /app
-COPY . .
-RUN mvn clean package -DskipTests
+FROM maven:3.9.9-eclipse-temurin-21-alpine AS build
 
-# Estágio 2: Execução
-FROM eclipse-temurin:21-jre
+WORKDIR /app
+
+# Copia apenas os arquivos de build para aproveitar cache do Docker.
+COPY pom.xml mvnw ./
+COPY .mvn .mvn
+RUN chmod +x mvnw # Garante permissão de execução para o wrapper do Maven.
+
+# Copia o código-fonte e constrói o pacote sem executar testes.
+COPY src ./src
+RUN ./mvnw -B package -DskipTests
+
+# Imagem final menor apenas com runtime Java.
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
+
+# Porta usada pelo Spring Boot dentro do container.
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+# Inicia a aplicação Java.
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

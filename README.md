@@ -57,6 +57,9 @@ Antes de começar, você precisará ter instalado em sua máquina:
    MYSQL_PASSWORD=suasenha_user
    DB_PORT_HOST=3307
    API_PORT_HOST=8080
+   # Configuração de portas (opção B): HTTP em 8080, HTTPS em 8443
+   API_HTTP_PORT=8080
+   API_HTTPS_PORT=8443
    ```
 
 ---
@@ -76,6 +79,11 @@ O Docker irá:
 3. Construir a aplicação Java e aguardar o banco ficar saudável.
 4. Disponibilizar a aplicação na porta `8080`.
 
+Nota sobre HTTP vs HTTPS (opção B)
+- A aplicação agora está configurada por padrão para rodar HTTP em `8080` e HTTPS em `8443`.
+- Acesse `http://localhost:8080/` e você será redirecionado para `https://localhost:8443/`.
+- Não é possível escutar HTTP e HTTPS na mesma porta simultaneamente; o conector HTTP usa uma porta diferente e redireciona para a porta HTTPS.
+
 ---
 
 ## 💻 Execução Local (Desenvolvimento)
@@ -93,6 +101,14 @@ Caso queira rodar a aplicação fora do Docker para desenvolvimento rápido:
    cd adega
    ./mvnw spring-boot:run
    ```
+
+Teste rápido do redirecionamento HTTP→HTTPS (sem proxy):
+
+```bash
+# requisitar via HTTP na porta 8080 retornará redirect para HTTPS 8443
+curl -v http://localhost:8080/login
+# você deve ver 301/302 com Location: https://localhost:8443/login
+```
 
 ---
 
